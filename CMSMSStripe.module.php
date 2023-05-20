@@ -14,7 +14,7 @@ class CMSMSStripe extends CMSModule
 	public function GetAuthor() { return 'Magal Hezi'; }
 	public function GetAuthorEmail() { return 'h_magal@hotmail.com'; }
 	public function UninstallPreMessage() { return $this->Lang('ask_uninstall'); }
-	public function GetAdminSection() { return 'extentions'; }
+	public function GetAdminSection() { return 'ecommerce'; }
 	
 	public function InitializeFrontend() {
 		$this->RegisterModulePlugin();
@@ -40,6 +40,30 @@ class CMSMSStripe extends CMSModule
 		}
 
 	}
+
+	/*---------------------------------------------------------
+   AddItem()
+   ---------------------------------------------------------*/
+   public function AddItem($name,$number,$quantity,$weight,$amount,$tax = '') {
+		$name = strip_tags($name);
+		$name = html_entity_decode($name);
+		$name = trim($name);
+		if( !isset($this->_data['items']) ) {
+			$this->_data['items'] = array();
+		}
+		
+		if( !isset($this->_items[$name]) ) {
+		$this->_data['items'][$name] = array('name'=>$name,
+						'number'=>$number,
+						'quantity'=>$quantity,
+						'weight'=>$weight,
+						'amount'=>$amount);
+			if(!empty($tax)) {
+				$this->_data['items'][$name]['tax'] = $tax;
+			}
+		}
+	}
+
 }
 
 ?>
