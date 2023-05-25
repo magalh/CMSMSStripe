@@ -1,6 +1,8 @@
 <?php
 if( !defined('CMS_VERSION') ) exit;
 
+use \CMSMSStripe\utils;
+
 $type = "card";
 if (isset($params['type'])) {
     $type = trim($params['type']);
@@ -10,45 +12,31 @@ if (!isset($amount)) {
     throw new \LogicException( 'Amount is needed' );
 }
 
-$this->checkSetup();
+$this->validate_config();
+$vars = $smarty->getTemplateVars('cmsms_stripe');
 
-$smarty->assign('stripe_publishable_key',$this->GetPreference('stripe_publishable_key'));
-$smarty->assign('stripe_secret',$this->GetPreference('stripe_secret'));
+$template = null;
+if (isset($params['template'])) {
+    $template = trim($params['template']);
+}
+else {
+    $template = utils::find_layout_template($params,'simple_checkout','CMSMSStripe::Checkout');
+}
 
-$stripe = new \Stripe\StripeClient($this->GetPreference('stripe_secret'));
+if (!isset($params['returnto'])) {
+    $params['returnto'] = xt_url::current_url();
+} 
 
-try {
-	$paymentIntent = $stripe->paymentIntents->create([
-	  'payment_method_types' => [$type],
-	  'amount' => $amount,
-	  'currency' => 'usd',
-	]);
-  } catch (\Stripe\Exception\ApiErrorException $e) {
-	http_response_code(400);
-	error_log($e->getError()->message);
-  ?>
-	<h1>Error</h1>
-	<p>Failed to create a PaymentIntent</p>
-	<p>Please check the server logs for more information</p>
-  <?php
-	exit;
-  } catch (Exception $e) {
-	error_log($e);
-	http_response_code(500);
-	exit;
-  }
+$mods = array("module"=>"CMSMSStripe","action"=>"webhook","forajax"=>true,"page"=>"tester");
+$actionurl = utils::module_action_link($mods,$smarty);
+echo $actionurl;
+//print_r($actionurl);
+//$action_url = $this->create_url('m1_','admin_editcontent','',array('content_id'=>$key3));
+//$action_url = $this->create_url('cntnt01','create-checkout-session','',\xt_utils::encrypt_params($params));
 
-
-/*$customer = $stripe->customers->create([
-    'description' => 'example customer',
-    'email' => 'email@example.com',
-    'payment_method' => 'pm_card_visa',
-]);*/
-echo $customer;
-
-
+//$tpl = $smarty->CreateTemplate($this->GetTemplateResource($template),null,null,$smarty);
 $tpl = $smarty->CreateTemplate($this->GetTemplateResource('default.tpl'),null,null,$smarty);
-//$tpl->assign('orders',$orders);
+$tpl->assign('action_url',$action_url);
 $tpl->display();
 
 

@@ -2,29 +2,23 @@
 if( !defined('CMS_VERSION') ) exit;
 if( !$this->CheckPermission(CMSMSStripe::MANAGE_PERM) ) return;
 
-$tpl = $smarty->CreateTemplate($this->GetTemplateResource('defaultadmin.tpl'),null,null,$smarty);
-   
-   
-   if( isset($params['submit']) ) {
-	$this->SetPreference('stripe_env',$params['stripe_env']);
-	$this->SetPreference('stripe_publishable_key',$params['stripe_publishable_key']);
-	$this->SetPreference('stripe_secret',$params['stripe_secret']);
-	$this->SetMessage("Saved");
-	$this->RedirectToAdminTab();	
-   }
+use \CMSMSStripe\utils;
+use \CMSMSStripe\smarty_plugins;
 
-    $smarty->assign('stripe_env',$this->GetPreference('stripe_env'));
-	$smarty->assign('stripe_publishable_key',$this->GetPreference('stripe_publishable_key'));
-	$smarty->assign('stripe_secret',$this->GetPreference('stripe_secret'));
+$this->validate_config();
 
-	$list = $this->ListPreferencesByPrefix("setting_");
-	$profiles = array();
-	foreach( $list as $one ) {
-		$profiles[] = $this->GetPreference('setting_'.$one);
-	}
-	$smarty->assign('mod_settings',$profiles);
+echo $this->StartTabHeaders();
+echo $this->SetTabHeader('logs', "Logs");
+echo $this->SetTabHeader('settings',"Settings");
+echo $this->EndTabHeaders();
 
-
-	$tpl->display();
+echo $this->StartTabContent();
+echo $this->StartTab('logs');
+//include(__DIR__.'/function.admin_logs_tab.php');
+echo $this->EndTab();
+echo $this->StartTab('settings');
+include(__DIR__.'/function.admin_settings_tab.php');
+echo $this->EndTab();
+echo $this->EndTabContent();
 
 ?>

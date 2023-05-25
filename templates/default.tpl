@@ -1,3 +1,6 @@
-<h3>Stripe Settings:</h3>
 
-{get_template_vars}
+<form action="{$action_url}" method="POST">
+<button type="submit">Checkout</button>
+</form>
+
+{*get_template_vars*}
