@@ -78,7 +78,7 @@ class CMSMSStripe extends CMSModule
 	public static function validate_config()
     {
         $CMSMSExt = \xt_utils::get_xt();
-		$mod = cge_utils::get_module('CMSMSStripe');
+		$mod = xt_utils::get_module('CMSMSStripe');
 		try {
 			if(!$mod->GetPreference('cmsms_stripe_secret')) throw new \RuntimeException( 'Stripe Keys missing' );
 			if(!$mod->GetPreference('cmsms_stripe_publishable_key')) throw new \RuntimeException('Stripe Keys missing');
