@@ -5,19 +5,16 @@
 namespace Stripe;
 
 /**
- * <code>Source</code> objects allow you to accept a variety of payment methods.
- * They represent a customer's payment instrument, and can be used with the Stripe
- * API just like a <code>Card</code> object: once chargeable, they can be charged,
- * or can be attached to customers.
+ * <code>Source</code> objects allow you to accept a variety of payment methods. They
+ * represent a customer's payment instrument, and can be used with the Stripe API
+ * just like a <code>Card</code> object: once chargeable, they can be charged, or can be
+ * attached to customers.
  *
- * Stripe doesn't recommend using the deprecated <a
- * href="https://stripe.com/docs/api/sources">Sources API</a>. We recommend that
- * you adopt the <a
- * href="https://stripe.com/docs/api/payment_methods">PaymentMethods API</a>. This
- * newer API provides access to our latest features and payment method types.
+ * Stripe doesn't recommend using the deprecated <a href="https://stripe.com/docs/api/sources">Sources API</a>.
+ * We recommend that you adopt the <a href="https://stripe.com/docs/api/payment_methods">PaymentMethods API</a>.
+ * This newer API provides access to our latest features and payment method types.
  *
- * Related guides: <a href="https://stripe.com/docs/sources">Sources API</a> and <a
- * href="https://stripe.com/docs/sources/customers">Sources &amp; Customers</a>.
+ * Related guides: <a href="https://stripe.com/docs/sources">Sources API</a> and <a href="https://stripe.com/docs/sources/customers">Sources &amp; Customers</a>.
  *
  * @property string $id Unique identifier for the object.
  * @property string $object String representing the object's type. Objects of the same type share the same value.
@@ -25,6 +22,7 @@ namespace Stripe;
  * @property null|\Stripe\StripeObject $ach_debit
  * @property null|\Stripe\StripeObject $acss_debit
  * @property null|\Stripe\StripeObject $alipay
+ * @property null|string $allow_redisplay This field indicates whether this payment method can be shown again to its customer in a checkout flow. Stripe products such as Checkout and Elements use this field to determine whether a payment method can be shown as a saved payment method in a checkout flow. The field defaults to “unspecified”.
  * @property null|int $amount A positive integer in the smallest currency unit (that is, 100 cents for $1.00, or 1 for ¥1, Japanese Yen being a zero-decimal currency) representing the total amount associated with the source. This is the amount for which the source will be chargeable once ready. Required for <code>single_use</code> sources.
  * @property null|\Stripe\StripeObject $au_becs_debit
  * @property null|\Stripe\StripeObject $bancontact
@@ -62,9 +60,11 @@ class Source extends ApiResource
 {
     const OBJECT_NAME = 'source';
 
-    use ApiOperations\Create;
-    use ApiOperations\Retrieve;
     use ApiOperations\Update;
+
+    const ALLOW_REDISPLAY_ALWAYS = 'always';
+    const ALLOW_REDISPLAY_LIMITED = 'limited';
+    const ALLOW_REDISPLAY_UNSPECIFIED = 'unspecified';
 
     const FLOW_CODE_VERIFICATION = 'code_verification';
     const FLOW_NONE = 'none';
@@ -77,8 +77,100 @@ class Source extends ApiResource
     const STATUS_FAILED = 'failed';
     const STATUS_PENDING = 'pending';
 
+    const TYPE_ACH_CREDIT_TRANSFER = 'ach_credit_transfer';
+    const TYPE_ACH_DEBIT = 'ach_debit';
+    const TYPE_ACSS_DEBIT = 'acss_debit';
+    const TYPE_ALIPAY = 'alipay';
+    const TYPE_AU_BECS_DEBIT = 'au_becs_debit';
+    const TYPE_BANCONTACT = 'bancontact';
+    const TYPE_CARD = 'card';
+    const TYPE_CARD_PRESENT = 'card_present';
+    const TYPE_EPS = 'eps';
+    const TYPE_GIROPAY = 'giropay';
+    const TYPE_IDEAL = 'ideal';
+    const TYPE_KLARNA = 'klarna';
+    const TYPE_MULTIBANCO = 'multibanco';
+    const TYPE_P24 = 'p24';
+    const TYPE_SEPA_CREDIT_TRANSFER = 'sepa_credit_transfer';
+    const TYPE_SEPA_DEBIT = 'sepa_debit';
+    const TYPE_SOFORT = 'sofort';
+    const TYPE_THREE_D_SECURE = 'three_d_secure';
+    const TYPE_WECHAT = 'wechat';
+
     const USAGE_REUSABLE = 'reusable';
     const USAGE_SINGLE_USE = 'single_use';
+
+    /**
+     * Creates a new source object.
+     *
+     * @param null|array $params
+     * @param null|array|string $options
+     *
+     * @throws \Stripe\Exception\ApiErrorException if the request fails
+     *
+     * @return \Stripe\Source the created resource
+     */
+    public static function create($params = null, $options = null)
+    {
+        self::_validateParams($params);
+        $url = static::classUrl();
+
+        list($response, $opts) = static::_staticRequest('post', $url, $params, $options);
+        $obj = \Stripe\Util\Util::convertToStripeObject($response->json, $opts);
+        $obj->setLastResponse($response);
+
+        return $obj;
+    }
+
+    /**
+     * Retrieves an existing source object. Supply the unique source ID from a source
+     * creation request and Stripe will return the corresponding up-to-date source
+     * object information.
+     *
+     * @param array|string $id the ID of the API resource to retrieve, or an options array containing an `id` key
+     * @param null|array|string $opts
+     *
+     * @throws \Stripe\Exception\ApiErrorException if the request fails
+     *
+     * @return \Stripe\Source
+     */
+    public static function retrieve($id, $opts = null)
+    {
+        $opts = \Stripe\Util\RequestOptions::parse($opts);
+        $instance = new static($id, $opts);
+        $instance->refresh();
+
+        return $instance;
+    }
+
+    /**
+     * Updates the specified source by setting the values of the parameters passed. Any
+     * parameters not provided will be left unchanged.
+     *
+     * This request accepts the <code>metadata</code> and <code>owner</code> as
+     * arguments. It is also possible to update type specific information for selected
+     * payment methods. Please refer to our <a href="/docs/sources">payment method
+     * guides</a> for more detail.
+     *
+     * @param string $id the ID of the resource to update
+     * @param null|array $params
+     * @param null|array|string $opts
+     *
+     * @throws \Stripe\Exception\ApiErrorException if the request fails
+     *
+     * @return \Stripe\Source the updated resource
+     */
+    public static function update($id, $params = null, $opts = null)
+    {
+        self::_validateParams($params);
+        $url = static::resourceUrl($id);
+
+        list($response, $opts) = static::_staticRequest('post', $url, $params, $opts);
+        $obj = \Stripe\Util\Util::convertToStripeObject($response->json, $opts);
+        $obj->setLastResponse($response);
+
+        return $obj;
+    }
 
     use ApiOperations\NestedResource;
 
@@ -128,7 +220,7 @@ class Source extends ApiResource
      *
      * @throws \Stripe\Exception\ApiErrorException if the request fails
      *
-     * @return \Stripe\Collection<\Stripe\SourceTransaction> list of SourceTransactions
+     * @return \Stripe\Collection<\Stripe\SourceTransaction> list of source transactions
      */
     public static function allSourceTransactions($id, $params = null, $opts = null)
     {
