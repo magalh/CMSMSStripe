@@ -32,7 +32,7 @@ class CMSMSStripe extends CMSModule
 	const TRANSACTIONS_PERM = 'view_stripe_transactions';
 	const SUBSCRIPTIONS_PERM = 'manage_stripe_subscriptions';
 	
-	public function GetVersion() { return '2.0.9'; }
+	public function GetVersion() { return '2.0.10'; }
 	public function MinimumCMSVersion() {
         return '2.2.16';
     }
@@ -46,6 +46,8 @@ class CMSMSStripe extends CMSModule
 	public function UninstallPreMessage() { return $this->Lang('ask_uninstall'); }
 	public function GetAdminSection() { return 'siteadmin'; }
 	public function GetDependencies(){ return ['CMSMSExt' => '1.4.3']; }
+	public function GetEventDescription( $eventname ) { return $this->lang('event_info_' . $eventname); }
+    public function GetEventHelp( $eventname ) { return $this->lang('event_help_' . $eventname); }
 
 	public function InitializeFrontend() {
 		$this->RegisterModulePlugin();
@@ -166,11 +168,9 @@ class CMSMSStripe extends CMSModule
     {
 		$this->AddEventHandler('MAMS', 'OnLogin', false);
 		$this->AddEventHandler('MAMS', 'OnLogout', false);
-		$this->AddEventHandler('MAMS', 'OnExpireUser', false);
 		$this->AddEventHandler('MAMS', 'OnCreateUser', false);
 		$this->AddEventHandler('MAMS', 'OnUpdateUser', false);
 		$this->AddEventHandler('MAMSRegistration', 'onUserRegistered', false);
-		$this->CreateEvent('StripePaymentCompleted');
     }
 
 	function DoEvent($originator, $eventname, &$params)
@@ -309,7 +309,7 @@ class CMSMSStripe extends CMSModule
 		
 		audit('', 'CMSMSStripe', 'Payment completed - Session: ' . $session->id . ', Amount: ' . ($session->amount_total / 100) . ', Customer: ' . $session->customer);
 		
-		$this->SendEvent('StripePaymentCompleted', [
+		\CMSMS\HookManager::do_hook('CMSMSStripe::StripePaymentCompleted', [
 			'session' => $session_full,
 			'customer_id' => $session->customer,
 			'amount' => $session->amount_total / 100,
@@ -320,6 +320,99 @@ class CMSMSStripe extends CMSModule
 	public function HandlePaymentSucceeded($payment_intent)
 	{
 		audit('', 'CMSMSStripe', 'Payment intent succeeded: ' . $payment_intent->id . ', Amount: ' . ($payment_intent->amount / 100));
+	}
+
+	public function HandlePaymentFailed($payment_intent)
+	{
+		audit('', 'CMSMSStripe', 'Payment failed: ' . $payment_intent->id);
+		
+		\CMSMS\HookManager::do_hook('CMSMSStripe::StripePaymentFailed', [
+			'payment_intent_id' => $payment_intent->id,
+			'amount' => $payment_intent->amount / 100,
+			'currency' => $payment_intent->currency,
+			'customer' => $payment_intent->customer ?? null,
+			'error' => $payment_intent->last_payment_error->message ?? 'Unknown error'
+		]);
+	}
+
+	public function HandleSubscriptionExpired($subscription)
+	{
+		$this->validate_config();
+		$stripe = new \Stripe\StripeClient($this->GetPreference('cmsms_stripe_secret'));
+		
+		$customer = $stripe->customers->retrieve($subscription->customer);
+		$mams_user_id = $customer->metadata->mams_user_id ?? null;
+		
+		audit('', 'CMSMSStripe', 'Subscription expired: ' . $subscription->id . ', MAMS User: ' . $mams_user_id);
+		
+		if($mams_user_id) {
+			$mams = \cms_utils::get_module('MAMS');
+			$mams->add_history($mams_user_id, 'Stripe subscription expired: ' . $subscription->id);
+		}
+		
+		\CMSMS\HookManager::do_hook('CMSMSStripe::StripeSubscriptionExpired', [
+			'subscription_id' => $subscription->id,
+			'customer_id' => $subscription->customer,
+			'mams_user_id' => $mams_user_id,
+			'status' => $subscription->status
+		]);
+	}
+
+	public function HandleSubscriptionCreated($subscription)
+	{
+		$this->validate_config();
+		$stripe = new \Stripe\StripeClient($this->GetPreference('cmsms_stripe_secret'));
+		$customer = $stripe->customers->retrieve($subscription->customer);
+		$mams_user_id = $customer->metadata->mams_user_id ?? null;
+		
+		audit('', 'CMSMSStripe', 'Subscription created: ' . $subscription->id);
+		
+		if($mams_user_id) {
+			$mams = \cms_utils::get_module('MAMS');
+			$mams->add_history($mams_user_id, 'Stripe subscription created: ' . $subscription->id);
+		}
+		
+		\CMSMS\HookManager::do_hook('CMSMSStripe::StripeSubscriptionCreated', [
+			'subscription_id' => $subscription->id,
+			'customer_id' => $subscription->customer,
+			'mams_user_id' => $mams_user_id,
+			'status' => $subscription->status
+		]);
+	}
+
+	public function HandleSubscriptionUpdated($subscription)
+	{
+		audit('', 'CMSMSStripe', 'Subscription updated: ' . $subscription->id);
+		
+		\CMSMS\HookManager::do_hook('CMSMSStripe::StripeSubscriptionUpdated', [
+			'subscription_id' => $subscription->id,
+			'customer_id' => $subscription->customer,
+			'status' => $subscription->status
+		]);
+	}
+
+	public function HandleRefundIssued($refund)
+	{
+		audit('', 'CMSMSStripe', 'Refund issued: ' . $refund->id . ', Amount: ' . ($refund->amount / 100));
+		
+		\CMSMS\HookManager::do_hook('CMSMSStripe::StripeRefundIssued', [
+			'refund_id' => $refund->id,
+			'amount' => $refund->amount / 100,
+			'currency' => $refund->currency,
+			'payment_intent' => $refund->payment_intent
+		]);
+	}
+
+	public function HandleInvoicePaymentFailed($invoice)
+	{
+		audit('', 'CMSMSStripe', 'Invoice payment failed: ' . $invoice->id);
+		
+		\CMSMS\HookManager::do_hook('CMSMSStripe::StripeInvoicePaymentFailed', [
+			'invoice_id' => $invoice->id,
+			'customer_id' => $invoice->customer,
+			'amount_due' => $invoice->amount_due / 100,
+			'subscription_id' => $invoice->subscription ?? null
+		]);
 	}
 
 }

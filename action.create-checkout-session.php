@@ -50,6 +50,13 @@ if($price->type === 'recurring') {
 
 $checkout_session = $stripe->checkout->sessions->create($session_params);
 
+\CMSMS\HookManager::do_hook('CMSMSStripe::StripeSessionCreated', [
+	'session_id' => $checkout_session->id,
+	'amount' => $checkout_session->amount_total / 100,
+	'currency' => $checkout_session->currency,
+	'customer' => $checkout_session->customer ?? null
+]);
+
 header("HTTP/1.1 303 See Other");
 header("Location: " . $checkout_session->url);
 

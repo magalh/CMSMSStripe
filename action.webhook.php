@@ -29,6 +29,32 @@ switch($event->type) {
 		$payment_intent = $event->data->object;
 		$this->HandlePaymentSucceeded($payment_intent);
 		break;
+	case 'payment_intent.payment_failed':
+		$payment_intent = $event->data->object;
+		$this->HandlePaymentFailed($payment_intent);
+		break;
+	case 'customer.subscription.created':
+		$subscription = $event->data->object;
+		$this->HandleSubscriptionCreated($subscription);
+		break;
+	case 'customer.subscription.updated':
+		$subscription = $event->data->object;
+		$this->HandleSubscriptionUpdated($subscription);
+		break;
+	case 'customer.subscription.deleted':
+		$subscription = $event->data->object;
+		$this->HandleSubscriptionExpired($subscription);
+		break;
+	case 'charge.refunded':
+		$charge = $event->data->object;
+		if(isset($charge->refunds->data[0])) {
+			$this->HandleRefundIssued($charge->refunds->data[0]);
+		}
+		break;
+	case 'invoice.payment_failed':
+		$invoice = $event->data->object;
+		$this->HandleInvoicePaymentFailed($invoice);
+		break;
 }
 
 http_response_code(200);

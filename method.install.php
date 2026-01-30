@@ -30,10 +30,17 @@ $dict->ExecuteSQLArray($sqlarray);
 
 $this->AddEventHandler('MAMS', 'OnLogin', false);
 $this->AddEventHandler('MAMS', 'OnLogout', false);
-$this->AddEventHandler('MAMS', 'OnExpireUser', false);
 $this->AddEventHandler('MAMS', 'OnCreateUser', false);
 $this->AddEventHandler('MAMS', 'OnUpdateUser', false);
 $this->AddEventHandler('MAMSRegistration', 'onUserRegistered', false);
+
+$this->CreateEvent('StripeSessionCreated');
+$this->CreateEvent('StripePaymentCompleted');
+$this->CreateEvent('StripePaymentFailed');
+$this->CreateEvent('StripeSubscriptionCreated');
+$this->CreateEvent('StripeSubscriptionUpdated');
+$this->CreateEvent('StripeSubscriptionExpired');
+$this->CreateEvent('StripeInvoicePaymentFailed');
 
 try {
 	$uid = max(1, get_userid(FALSE));

@@ -104,4 +104,14 @@ if( version_compare($oldversion,'2.0.9') < 0 ) {
 	}
 }
 
+if( version_compare($oldversion,'2.0.10') < 0 ) {
+	$this->CreateEvent('StripeSessionCreated');
+	$this->CreateEvent('StripePaymentCompleted');
+	$this->CreateEvent('StripePaymentFailed');
+	$this->CreateEvent('StripeSubscriptionCreated');
+	$this->CreateEvent('StripeSubscriptionUpdated');
+	$this->CreateEvent('StripeSubscriptionExpired');
+	$this->CreateEvent('StripeInvoicePaymentFailed');
+}
+
 ?>
