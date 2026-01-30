@@ -20,7 +20,7 @@
   <tbody>
     {foreach $products as $product}
     <tr class="{cycle values='row1,row2'}">
-      <td>{$product->name}</td>
+      <td><a href="{cms_action_url action=admin_edit_product product_id=$product->id}">{$product->name}</a></td>
       <td>{$product->description|truncate:50}</td>
       <td>{if $product->active}Yes{else}No{/if}</td>
       <td>{$product->created|date_format:'%Y-%m-%d %H:%M'}</td>

@@ -10,7 +10,7 @@ $product_id = \xt_param::get_string($params, 'product_id');
 $product = null;
 
 if(isset($params['cancel'])) {
-	$this->RedirectToAdminTab('products');
+	$this->Redirect($id, 'admin_products', $returnid);
 }
 
 if(isset($params['submit'])) {
@@ -57,7 +57,7 @@ if(isset($params['submit'])) {
 			$stripe->products->create($data);
 			$this->SetMessage($this->Lang('product_created'));
 		}
-		$this->RedirectToAdminTab('products');
+		$this->Redirect($id, 'admin_products', $returnid);
 	} catch(\Exception $e) {
 		$this->DisplayErrorMessage($e->getMessage());
 	}

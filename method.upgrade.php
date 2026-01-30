@@ -73,4 +73,35 @@ if( version_compare($oldversion,'2.0.7') < 0 ) {
 	}
 }
 
+if( version_compare($oldversion,'2.0.8') < 0 ) {
+	$this->CreatePermission(CMSMSStripe::PRODUCTS_PERM,'Manage Stripe Products');
+	$this->CreatePermission(CMSMSStripe::TRANSACTIONS_PERM,'View Stripe Transactions');
+	$this->CreatePermission(CMSMSStripe::SUBSCRIPTIONS_PERM,'Manage Stripe Subscriptions');
+}
+
+if( version_compare($oldversion,'2.0.9') < 0 ) {
+	try {
+		$uid = max(1, get_userid(FALSE));
+		
+		$payment_success_type = new \CmsLayoutTemplateType();
+		$payment_success_type->set_originator($this->GetName());
+		$payment_success_type->set_name('payment_success');
+		$payment_success_type->set_dflt_flag(TRUE);
+		$payment_success_type->set_lang_callback('CMSMSStripe::page_type_lang_callback');
+		$payment_success_type->set_content_callback('CMSMSStripe::reset_page_type_defaults');
+		$payment_success_type->reset_content_to_factory();
+		$payment_success_type->save();
+		
+		$tpl = new CmsLayoutTemplate;
+		$tpl->set_name($tpl::generate_unique_name('CMSMSStripe Payment Success'));
+		$tpl->set_owner($uid);
+		$tpl->set_type($payment_success_type);
+		$tpl->set_content($payment_success_type->get_dflt_contents());
+		$tpl->set_type_dflt(TRUE);
+		$tpl->save();
+	} catch(\Exception $e) {
+		audit('', $this->GetName(), 'Template creation error: ' . $e->getMessage());
+	}
+}
+
 ?>

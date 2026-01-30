@@ -1,6 +1,9 @@
 <?php
 if( !defined('CMS_VERSION') ) exit;
 $this->CreatePermission(CMSMSStripe::MANAGE_PERM,'Manage CMSMSStripe');
+$this->CreatePermission(CMSMSStripe::PRODUCTS_PERM,'Manage Stripe Products');
+$this->CreatePermission(CMSMSStripe::TRANSACTIONS_PERM,'View Stripe Transactions');
+$this->CreatePermission(CMSMSStripe::SUBSCRIPTIONS_PERM,'Manage Stripe Subscriptions');
 
 $db = $this->GetDb();
 $dict = NewDataDictionary($db);
@@ -53,6 +56,15 @@ try {
 	$product_detail_type->reset_content_to_factory();
 	$product_detail_type->save();
 	
+	$payment_success_type = new \CmsLayoutTemplateType();
+	$payment_success_type->set_originator($this->GetName());
+	$payment_success_type->set_name('payment_success');
+	$payment_success_type->set_dflt_flag(TRUE);
+	$payment_success_type->set_lang_callback('CMSMSStripe::page_type_lang_callback');
+	$payment_success_type->set_content_callback('CMSMSStripe::reset_page_type_defaults');
+	$payment_success_type->reset_content_to_factory();
+	$payment_success_type->save();
+	
 	$tpl = new CmsLayoutTemplate;
 	$tpl->set_name($tpl::generate_unique_name('CMSMSStripe Product List'));
 	$tpl->set_owner($uid);
@@ -68,6 +80,14 @@ try {
 	$tpl2->set_content($product_detail_type->get_dflt_contents());
 	$tpl2->set_type_dflt(TRUE);
 	$tpl2->save();
+	
+	$tpl3 = new CmsLayoutTemplate;
+	$tpl3->set_name($tpl3::generate_unique_name('CMSMSStripe Payment Success'));
+	$tpl3->set_owner($uid);
+	$tpl3->set_type($payment_success_type);
+	$tpl3->set_content($payment_success_type->get_dflt_contents());
+	$tpl3->set_type_dflt(TRUE);
+	$tpl3->save();
 } catch(\Exception $e) {
 	audit('', $this->GetName(), 'Template creation error: ' . $e->getMessage());
 }

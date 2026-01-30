@@ -28,8 +28,11 @@ class CMSMSStripe extends CMSModule
 	}
 
 	const MANAGE_PERM = 'manage_cmsms_stripe';
+	const PRODUCTS_PERM = 'manage_stripe_products';
+	const TRANSACTIONS_PERM = 'view_stripe_transactions';
+	const SUBSCRIPTIONS_PERM = 'manage_stripe_subscriptions';
 	
-	public function GetVersion() { return '2.0.7'; }
+	public function GetVersion() { return '2.0.9'; }
 	public function MinimumCMSVersion() {
         return '2.2.16';
     }
@@ -41,7 +44,8 @@ class CMSMSStripe extends CMSModule
     public function GetAuthor() { return 'Magal Hezi'; }
     public function GetAuthorEmail() { return 'magal@pixelsolutions.biz'; }
 	public function UninstallPreMessage() { return $this->Lang('ask_uninstall'); }
-	public function GetAdminSection() { return 'ecommerce'; }
+	public function GetAdminSection() { return 'siteadmin'; }
+	public function GetDependencies(){ return ['CMSMSExt' => '1.4.3']; }
 
 	public function InitializeFrontend() {
 		$this->RegisterModulePlugin();
@@ -80,6 +84,61 @@ class CMSMSStripe extends CMSModule
 	
     }
 
+	public function GetAdminMenuItems()
+	{
+		$out = [];
+
+		if($this->CheckPermission(self::MANAGE_PERM))
+		{
+			$obj = new CmsAdminMenuItem();
+			$obj->module = $this->GetName();
+			$obj->section = 'siteadmin';
+			$obj->title = 'Stripe Settings';
+			$obj->description = 'Manage Stripe Module Settings';
+			$obj->action = 'defaultadmin';
+			$obj->url = $this->create_url('m1_', $obj->action);
+			$out[] = $obj;
+		}
+		
+		if($this->CheckPermission(self::PRODUCTS_PERM))
+		{
+			$obj = new CmsAdminMenuItem();
+			$obj->module = $this->GetName();
+			$obj->section = 'ecommerce';
+			$obj->title = 'Product Catalog';
+			$obj->description = 'Manage Stripe Products';
+			$obj->action = 'admin_products';
+			$obj->url = $this->create_url('m1_', $obj->action);
+			$out[] = $obj;
+		}
+		
+		if($this->CheckPermission(self::TRANSACTIONS_PERM))
+		{
+			$obj = new CmsAdminMenuItem();
+			$obj->module = $this->GetName();
+			$obj->section = 'ecommerce';
+			$obj->title = 'Transactions';
+			$obj->description = 'View Stripe Transactions';
+			$obj->action = 'admin_transactions';
+			$obj->url = $this->create_url('m1_', $obj->action);
+			$out[] = $obj;
+		}
+		
+		if($this->CheckPermission(self::SUBSCRIPTIONS_PERM))
+		{
+			$obj = new CmsAdminMenuItem();
+			$obj->module = $this->GetName();
+			$obj->section = 'ecommerce';
+			$obj->title = 'Subscriptions';
+			$obj->description = 'Manage Stripe Subscriptions';
+			$obj->action = 'admin_subscriptions';
+			$obj->url = $this->create_url('m1_', $obj->action);
+			$out[] = $obj;
+		}
+		
+		return $out;
+	}
+
 	public static function validate_config()
     {
         $CMSMSExt = \xt_utils::get_xt();
@@ -111,6 +170,7 @@ class CMSMSStripe extends CMSModule
 		$this->AddEventHandler('MAMS', 'OnCreateUser', false);
 		$this->AddEventHandler('MAMS', 'OnUpdateUser', false);
 		$this->AddEventHandler('MAMSRegistration', 'onUserRegistered', false);
+		$this->CreateEvent('StripePaymentCompleted');
     }
 
 	function DoEvent($originator, $eventname, &$params)
@@ -220,6 +280,9 @@ class CMSMSStripe extends CMSModule
         case 'product_detail':
             $fn = 'orig_product_detail.tpl';
             break;
+        case 'payment_success':
+            $fn = 'orig_payment_success.tpl';
+            break;
         }
 
         if( !$fn ) return;
@@ -236,6 +299,28 @@ class CMSMSStripe extends CMSModule
             if( is_file($file) ) return file_get_contents($file);
         }
     }
+
+	public function HandleCheckoutCompleted($session)
+	{
+		$this->validate_config();
+		$stripe = new \Stripe\StripeClient($this->GetPreference('cmsms_stripe_secret'));
+		
+		$session_full = $stripe->checkout->sessions->retrieve($session->id, ['expand' => ['line_items', 'customer']]);
+		
+		audit('', 'CMSMSStripe', 'Payment completed - Session: ' . $session->id . ', Amount: ' . ($session->amount_total / 100) . ', Customer: ' . $session->customer);
+		
+		$this->SendEvent('StripePaymentCompleted', [
+			'session' => $session_full,
+			'customer_id' => $session->customer,
+			'amount' => $session->amount_total / 100,
+			'payment_intent' => $session->payment_intent
+		]);
+	}
+
+	public function HandlePaymentSucceeded($payment_intent)
+	{
+		audit('', 'CMSMSStripe', 'Payment intent succeeded: ' . $payment_intent->id . ', Amount: ' . ($payment_intent->amount / 100));
+	}
 
 }
 

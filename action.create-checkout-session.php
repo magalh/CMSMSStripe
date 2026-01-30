@@ -20,9 +20,28 @@ $session_params = [
 		'quantity' => 1,
 	]],
 	'mode' => 'payment',
-	'success_url' => $vars->url_success.'?session_id={CHECKOUT_SESSION_ID}',
+	'automatic_tax' => [
+		'enabled' => true,
+	],
+	'success_url' => CMS_ROOT_URL.'/index.php?mact=CMSMSStripe,cntnt01,success,0&cntnt01session_id={CHECKOUT_SESSION_ID}',
 	'cancel_url' => $cancel_url,
 ];
+
+$mams = \cms_utils::get_module('MAMS');
+
+$success_page = $this->GetPreference('cmsms_stripe_success_page');
+if($success_page) {
+	$returnid = $mams->resolve_alias_or_id($success_page);
+	$session_params['success_url'] .= '&cntnt01returnid='.$returnid;
+}
+
+$uid = $mams->LoggedInId();
+if($uid) {
+	$stripe_customer_id = $mams->GetUserPropertyFull('stripe_customer_id',$uid);
+	if($stripe_customer_id) {
+		$session_params['customer'] = $stripe_customer_id;
+	}
+}
 
 $price = $stripe->prices->retrieve($params['price_id']);
 if($price->type === 'recurring') {

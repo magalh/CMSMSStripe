@@ -49,6 +49,14 @@
 </div>
 
 <div class="pageoverflow">
+  <p class="pagetext"><label>{$mod->Lang('success_page_title')}:</label></p>
+  <p class="pageinput">
+  <input type="text" name="{$actionid}cmsms_stripe_success_page" value="{$cmsms_stripe->success_page}" size="50" placeholder="page-alias or 123"/>
+  </p>
+  <span class="helptext smallgrey">{$mod->Lang('success_page_descr')}</span>
+</div>
+
+<div class="pageoverflow">
   <p class="pagetext"><label>{$mod->Lang('url_cancel_title')}:</label></p>
   <p class="pageinput">
   <input type="text" name="{$actionid}cmsms_stripe_url_cancel" value="{$cmsms_stripe->url_cancel}" size="50"/>
