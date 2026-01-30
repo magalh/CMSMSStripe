@@ -66,5 +66,5 @@ catch( \Stripe\Exception\CardException $e ) {
 $data['error'] = $error;
 $data['message'] = $message;
 	
-\cge_utils::send_ajax_and_exit( $data );
+\xt_utils::send_ajax_and_exit( $data );
 ?>
