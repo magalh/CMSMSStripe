@@ -1,16 +1,18 @@
 <?php
 
-require 'vendor/autoload.php';
-//require 'lib/class.smarty_plugins.php';
-
 class CMSMSStripe extends CMSModule
 {
 
 	public function __construct()
-	{
-		spl_autoload_register( array($this, '_autoloader') );
-		parent::__construct();
-	}
+    {
+        $autoload_file = cms_join_path($this->GetModulePath(), 'vendor', 'autoload.php');
+        if (file_exists($autoload_file)) {
+            require_once $autoload_file;
+        }
+        
+        spl_autoload_register([$this, '_autoloader']);
+        parent::__construct();
+    }
 
 	private final function _autoloader($classname)
 	{
@@ -27,14 +29,17 @@ class CMSMSStripe extends CMSModule
 
 	const MANAGE_PERM = 'manage_cmsms_stripe';
 	
-	public function GetVersion() { return '1.0'; }
+	public function GetVersion() { return '2.0.7'; }
+	public function MinimumCMSVersion() {
+        return '2.2.16';
+    }
 	public function GetFriendlyName() { return $this->Lang('friendlyname'); }
 	public function GetAdminDescription() { return $this->Lang('admindescription'); }
 	public function IsPluginModule() { return TRUE; }
 	public function HasAdmin() { return TRUE; }
 	public function VisibleToAdminUser() { return $this->CheckPermission(self::MANAGE_PERM); }
-	public function GetAuthor() { return 'Magal Hezi'; }
-	public function GetAuthorEmail() { return 'h_magal@hotmail.com'; }
+    public function GetAuthor() { return 'Magal Hezi'; }
+    public function GetAuthorEmail() { return 'magal@pixelsolutions.biz'; }
 	public function UninstallPreMessage() { return $this->Lang('ask_uninstall'); }
 	public function GetAdminSection() { return 'ecommerce'; }
 
@@ -98,6 +103,72 @@ class CMSMSStripe extends CMSModule
 
 	}
 
+    public function RegisterEvents()
+    {
+		$this->AddEventHandler('MAMS', 'OnLogin', false);
+		$this->AddEventHandler('MAMS', 'OnLogout', false);
+		$this->AddEventHandler('MAMS', 'OnExpireUser', false);
+		$this->AddEventHandler('MAMS', 'OnCreateUser', false);
+		$this->AddEventHandler('MAMS', 'OnUpdateUser', false);
+		$this->AddEventHandler('MAMSRegistration', 'onUserRegistered', false);
+    }
+
+	function DoEvent($originator, $eventname, &$params)
+    {
+		//error_log('DoEvent called - Originator: '.$originator.', Event: '.$eventname);
+        if ($originator == 'MAMSRegistration' && $eventname == 'onUserRegistered') {
+			error_log('CMSMSStripe: onUserRegistered event triggered for user ID '.$params['id']);
+            $this->CreateCustomer($params);
+        }
+    }
+
+	public function CreateCustomer($params)
+	{
+		try {
+			$this->validate_config();
+			$stripe = new \Stripe\StripeClient($this->GetPreference('cmsms_stripe_secret'));
+			
+			$existing = $stripe->customers->search(['query' => 'email:"' . $params['username'] . '"']);
+			
+			if ($existing->data && count($existing->data) > 0) {
+				$customer = $existing->data[0];
+				$stripe->customers->update($customer->id, ['metadata' => ['mams_user_id' => $params['id']]]);
+				audit('', 'CMSMSStripe', 'Reused existing Stripe customer ' . $customer->id . ' for user ' . $params['id']);
+			} else {
+				$customer = $stripe->customers->create([
+					'email' => $params['username'],
+					'metadata' => ['mams_user_id' => $params['id']]
+				]);
+				audit('', 'CMSMSStripe', 'Created new Stripe customer ' . $customer->id . ' for user ' . $params['id']);
+			}
+			
+			$mams = \cms_utils::get_module('MAMS');
+			$gid = $mams->GetGroupID('stripe');
+			if ($gid < 1) {
+				$mams->AddGroup('stripe', 'Stripe Integration');
+				$gid = $mams->GetGroupID('stripe');
+				$propDefn = $mams->GetPropertyDefn('stripe_customer_id');
+				if (!$propDefn) {
+					$mams->AddPropertyDefn('stripe_customer_id', 'Stripe Customer ID', 0, 80, 255, 'a:0:{}', 0, 0);
+				}
+				if($gid > 0) {
+					$mams->AddGroupPropertyRelation($gid, 'stripe_customer_id', 0, -1, 0);
+				}
+				audit('', 'CMSMSStripe', 'Created MAMS stripe group and property');
+			}
+			
+			if($gid > 0) {
+				$mams->AssignUserToGroup($params['id'], $gid);
+			}
+			
+			$mams->SetUserProperty($params['id'], 'stripe_customer_id', $customer->id);
+			audit('', 'CMSMSStripe', 'Linked MAMS user ' . $params['id'] . ' to Stripe customer ' . $customer->id);
+			
+		} catch(\Exception $e) {
+			audit('', 'CMSMSStripe', 'Error creating Stripe customer: ' . $e->getMessage());
+		}
+	}
+
 	/*---------------------------------------------------------
    AddItem()
    ---------------------------------------------------------*/
@@ -130,13 +201,6 @@ class CMSMSStripe extends CMSModule
 	  $tpl->display();
 	}
 	
-	public function make_templates(){
-		$checkout_type = \CMSMSStripe\utils::create_template_type('simple_checkout', $this);
-		$fn = __DIR__.'/templates/orig_simple_checkout.tpl';
-		if ( is_file($fn) ) \CMSMSStripe\utils::create_template_of_type($checkout_type, 'Stripe Simple Checkout', file_get_contents($fn), true);
-
-	}
-
 	public static function page_type_lang_callback($str)
     {
         $mod = cms_utils::get_module('CMSMSStripe');
@@ -150,11 +214,11 @@ class CMSMSStripe extends CMSModule
 
         $fn = null;
         switch( $type->get_name() ) {
-        case 'Card Form':
-            $fn = 'orig_card_template.tpl';
+        case 'product_list':
+            $fn = 'orig_product_list.tpl';
             break;
-        case 'Checkout':
-            $fn = 'orig_checkout_template.tpl';
+        case 'product_detail':
+            $fn = 'orig_product_detail.tpl';
             break;
         }
 

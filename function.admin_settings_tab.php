@@ -11,6 +11,7 @@ if( isset($params['submit']) ) {
 	$this->SetPreference('cmsms_stripe_currency_code',strtoupper(\xt_param::get_string($params,'cmsms_stripe_currency_code')));
 	$this->SetPreference('cmsms_stripe_url_webhook',\xt_param::get_string($params,'cmsms_stripe_url_webhook'));
 	$this->SetPreference('cmsms_stripe_url_success',\xt_param::get_string($params,'cmsms_stripe_url_success'));
+	$this->SetPreference('cmsms_stripe_url_cancel',\xt_param::get_string($params,'cmsms_stripe_url_cancel'));
 	$this->SetMessage("Saved");
     $this->RedirectToAdminTab('settings');
 }

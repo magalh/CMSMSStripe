@@ -19,7 +19,9 @@
 <div class="pageoverflow">
  <p class="pagetext"><label>Secret:</label></p>
  <p class="pageinput">
-<input type="text" name="{$actionid}cmsms_stripe_secret" value="{$cmsms_stripe->secret}" size="50"/>
+<input type="text" id="stripe_secret" name="{$actionid}cmsms_stripe_secret" value="{$cmsms_stripe->secret}" size="50"/>
+<button type="button" id="test_credentials" class="btn btn-secondary" style="margin-left:10px;">Test Connection</button>
+<span id="test_result" style="margin-left:10px;"></span>
  </p>
 </div>
 <div class="pageoverflow">
@@ -47,8 +49,37 @@
 </div>
 
 <div class="pageoverflow">
+  <p class="pagetext"><label>{$mod->Lang('url_cancel_title')}:</label></p>
+  <p class="pageinput">
+  <input type="text" name="{$actionid}cmsms_stripe_url_cancel" value="{$cmsms_stripe->url_cancel}" size="50"/>
+  </p>
+  <span class="helptext smallgrey">{$mod->Lang('url_cancel_descr')}</span>
+</div>
+
+<div class="pageoverflow">
  <p class="pageinput">
  <input type="submit" name="{$actionid}submit" value="Save"/>
  </p>
 </div>
 {form_end}
+
+<script>
+$('#test_credentials').on('click', function() {
+	var secret = $('#stripe_secret').val();
+	if(!secret) {
+		$('#test_result').html('<span class="error">Secret key required</span>');
+		return;
+	}
+	$('#test_result').html('<span>Testing...</span>');
+	
+	$.post('{cms_action_url action=ajax_test_credentials forjs=1}&showtemplate=false', 
+		{ '{$actionid}secret': secret },
+		function(data) {
+			if(data.success) {
+				$('#test_result').html('<span style="color:green;">✓ ' + data.message + '</span>');
+			} else {
+				$('#test_result').html('<span style="color:red;">✗ ' + data.message + '</span>');
+			}
+		}, 'json');
+});
+</script>
