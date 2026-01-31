@@ -105,13 +105,23 @@ if( version_compare($oldversion,'2.0.9') < 0 ) {
 }
 
 if( version_compare($oldversion,'2.0.10') < 0 ) {
-	$this->CreateEvent('StripeSessionCreated');
-	$this->CreateEvent('StripePaymentCompleted');
-	$this->CreateEvent('StripePaymentFailed');
-	$this->CreateEvent('StripeSubscriptionCreated');
-	$this->CreateEvent('StripeSubscriptionUpdated');
-	$this->CreateEvent('StripeSubscriptionExpired');
-	$this->CreateEvent('StripeInvoicePaymentFailed');
+	$this->CreateEvent('SessionCreated');
+	$this->CreateEvent('PaymentCompleted');
+	$this->CreateEvent('PaymentFailed');
+	$this->CreateEvent('SubscriptionCreated');
+	$this->CreateEvent('SubscriptionUpdated');
+	$this->CreateEvent('SubscriptionExpired');
+	$this->CreateEvent('InvoicePaymentFailed');
+	
+	$db = $this->GetDb();
+	$dict = NewDataDictionary($db);
+	$taboptarray = array('mysql' => 'TYPE=MyISAM');
+	$flds = "event_id C(255) KEY,
+	         event_type C(100),
+	         created_at I
+	";
+	$sqlarray = $dict->CreateTableSQL(cms_db_prefix()."module_cmsmsstripe_events", $flds, $taboptarray);
+	$dict->ExecuteSQLArray($sqlarray);
 }
 
 ?>

@@ -25,6 +25,13 @@
  </p>
 </div>
 <div class="pageoverflow">
+ <p class="pagetext"><label>Webhook Secret:</label></p>
+ <p class="pageinput">
+<input type="text" name="{$actionid}cmsms_stripe_webhook_secret" value="{$cmsms_stripe->webhook_secret}" size="50"/>
+<span class="helptext smallgrey">Get this from Stripe CLI or Stripe Dashboard webhook settings</span>
+ </p>
+</div>
+<div class="pageoverflow">
  <p class="pagetext"><label>{$mod->Lang('currency_code')}:</label></p>
  <p class="pageinput">
  <select name="{$actionid}cmsms_stripe_currency_code">
@@ -69,6 +76,7 @@
  <input type="submit" name="{$actionid}submit" value="Save"/>
  </p>
 </div>
+{cms_action_url action=webhook}
 {form_end}
 
 <script>

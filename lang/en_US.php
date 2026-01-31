@@ -110,22 +110,22 @@ $lang['wunit_g'] = 'Grams (g)';
 $lang['year'] = 'Year';
 #Z
 
-$lang['event_info_StripeSessionCreated'] = 'Fired when a new Stripe checkout session is created';
-$lang['event_info_StripePaymentCompleted'] = 'Fired when a payment is successfully completed';
-$lang['event_info_StripePaymentFailed'] = 'Fired when a payment attempt fails';
-$lang['event_info_StripeSubscriptionCreated'] = 'Fired when a new subscription is created';
-$lang['event_info_StripeSubscriptionUpdated'] = 'Fired when a subscription is updated or modified';
-$lang['event_info_StripeSubscriptionExpired'] = 'Fired when a subscription expires or is deleted';
-$lang['event_info_StripeRefundIssued'] = 'Fired when a refund is issued for a payment';
-$lang['event_info_StripeInvoicePaymentFailed'] = 'Fired when a recurring invoice payment fails';
+$lang['event_info_SessionCreated'] = 'Fired when a new Stripe checkout session is created';
+$lang['event_info_PaymentCompleted'] = 'Fired when a payment is successfully completed';
+$lang['event_info_PaymentFailed'] = 'Fired when a payment attempt fails';
+$lang['event_info_SubscriptionCreated'] = 'Fired when a new subscription is created';
+$lang['event_info_SubscriptionUpdated'] = 'Fired when a subscription is updated or modified';
+$lang['event_info_SubscriptionExpired'] = 'Fired when a subscription expires or is deleted';
+$lang['event_info_RefundIssued'] = 'Fired when a refund is issued for a payment';
+$lang['event_info_InvoicePaymentFailed'] = 'Fired when a recurring invoice payment fails';
 
-$lang['event_help_StripeSessionCreated'] = '<p>Parameters: session_id, amount, currency, customer</p>';
-$lang['event_help_StripePaymentCompleted'] = '<p>Parameters: session, customer_id, amount, payment_intent</p>';
-$lang['event_help_StripePaymentFailed'] = '<p>Parameters: payment_intent_id, amount, currency, customer, error</p>';
-$lang['event_help_StripeSubscriptionCreated'] = '<p>Parameters: subscription_id, customer_id, mams_user_id, status</p>';
-$lang['event_help_StripeSubscriptionUpdated'] = '<p>Parameters: subscription_id, customer_id, status</p>';
-$lang['event_help_StripeSubscriptionExpired'] = '<p>Parameters: subscription_id, customer_id, mams_user_id, status</p>';
-$lang['event_help_StripeRefundIssued'] = '<p>Parameters: refund_id, amount, currency, payment_intent</p>';
-$lang['event_help_StripeInvoicePaymentFailed'] = '<p>Parameters: invoice_id, customer_id, amount_due, subscription_id</p>';
+$lang['event_help_SessionCreated'] = '<p>Parameters: session_id, amount, currency, customer</p>';
+$lang['event_help_PaymentCompleted'] = '<p>Parameters: session, customer_id, amount, payment_intent</p>';
+$lang['event_help_PaymentFailed'] = '<p>Parameters: payment_intent_id, amount, currency, customer, error</p>';
+$lang['event_help_SubscriptionCreated'] = '<p>Parameters: subscription_id, customer_id, mams_user_id, status</p>';
+$lang['event_help_SubscriptionUpdated'] = '<p>Parameters: subscription_id, customer_id, status</p>';
+$lang['event_help_SubscriptionExpired'] = '<p>Parameters: subscription_id, customer_id, mams_user_id, status</p>';
+$lang['event_help_RefundIssued'] = '<p>Parameters: refund_id, amount, currency, payment_intent</p>';
+$lang['event_help_InvoicePaymentFailed'] = '<p>Parameters: invoice_id, customer_id, amount_due, subscription_id</p>';
 
 ?>
