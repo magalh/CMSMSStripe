@@ -1,0 +1,164 @@
+{
+  "id": "evt_1SwK5OCq8GtG5fva2uphzjG5",
+  "object": "event",
+  "api_version": "2026-01-28.clover",
+  "created": 1770027025,
+  "data": {
+    "object": {
+      "id": "in_1SwK5KCq8GtG5fvaz9szfXfp",
+      "object": "invoice",
+      "account_country": "IT",
+      "account_name": "Pixel Solutions di Hezi Magal",
+      "account_tax_ids": null,
+      "amount_due": 1500,
+      "amount_overpaid": 0,
+      "amount_paid": 1500,
+      "amount_remaining": 0,
+      "amount_shipping": 0,
+      "application": null,
+      "attempt_count": 1,
+      "attempted": true,
+      "auto_advance": false,
+      "automatic_tax": {
+        "disabled_reason": null,
+        "enabled": false,
+        "liability": null,
+        "provider": null,
+        "status": null
+      },
+      "automatically_finalizes_at": null,
+      "billing_reason": "subscription_create",
+      "collection_method": "charge_automatically",
+      "created": 1770027022,
+      "currency": "usd",
+      "custom_fields": null,
+      "customer": "cus_Tu8MQVTJ6cRGUd",
+      "customer_account": null,
+      "customer_address": null,
+      "customer_email": null,
+      "customer_name": null,
+      "customer_phone": null,
+      "customer_shipping": null,
+      "customer_tax_exempt": "none",
+      "customer_tax_ids": [],
+      "default_payment_method": null,
+      "default_source": null,
+      "default_tax_rates": [],
+      "description": null,
+      "discounts": [],
+      "due_date": null,
+      "effective_at": 1770027022,
+      "ending_balance": 0,
+      "footer": null,
+      "from_invoice": null,
+      "hosted_invoice_url": "https://invoice.stripe.com/i/acct_1SuvpaCq8GtG5fva/test_YWNjdF8xU3V2cGFDcThHdEc1ZnZhLF9UdThNUWxPOTA1SElteFVWdXdCU1JNaFNpR3oyRWZoLDE2MDU2NzgyNg0200TGg9ubeT?s=ap",
+      "invoice_pdf": "https://pay.stripe.com/invoice/acct_1SuvpaCq8GtG5fva/test_YWNjdF8xU3V2cGFDcThHdEc1ZnZhLF9UdThNUWxPOTA1SElteFVWdXdCU1JNaFNpR3oyRWZoLDE2MDU2NzgyNg0200TGg9ubeT/pdf?s=ap",
+      "issuer": {
+        "type": "self"
+      },
+      "last_finalization_error": null,
+      "latest_revision": null,
+      "lines": {
+        "object": "list",
+        "data": [
+          {
+            "id": "il_1SwK5KCq8GtG5fvagJATCaw7",
+            "object": "line_item",
+            "amount": 1500,
+            "currency": "usd",
+            "description": "1 × myproduct (at $15.00 / month)",
+            "discount_amounts": [],
+            "discountable": true,
+            "discounts": [],
+            "invoice": "in_1SwK5KCq8GtG5fvaz9szfXfp",
+            "livemode": false,
+            "metadata": {},
+            "parent": {
+              "invoice_item_details": null,
+              "subscription_item_details": {
+                "invoice_item": null,
+                "proration": false,
+                "proration_details": {
+                  "credited_items": null
+                },
+                "subscription": "sub_1SwK5KCq8GtG5fvaJjwayq8P",
+                "subscription_item": "si_Tu8MAOOcgjc1uC"
+              },
+              "type": "subscription_item_details"
+            },
+            "period": {
+              "end": 1772446222,
+              "start": 1770027022
+            },
+            "pretax_credit_amounts": [],
+            "pricing": {
+              "price_details": {
+                "price": "price_1SwK5KCq8GtG5fvalAd158Hq",
+                "product": "prod_Tu8MnSGqN9Bblc"
+              },
+              "type": "price_details",
+              "unit_amount_decimal": "1500"
+            },
+            "quantity": 1,
+            "subtotal": 1500,
+            "taxes": []
+          }
+        ],
+        "has_more": false,
+        "total_count": 1,
+        "url": "/v1/invoices/in_1SwK5KCq8GtG5fvaz9szfXfp/lines"
+      },
+      "livemode": false,
+      "metadata": {},
+      "next_payment_attempt": null,
+      "number": "2QELTOVB-0005",
+      "on_behalf_of": null,
+      "parent": {
+        "quote_details": null,
+        "subscription_details": {
+          "metadata": {},
+          "subscription": "sub_1SwK5KCq8GtG5fvaJjwayq8P"
+        },
+        "type": "subscription_details"
+      },
+      "payment_settings": {
+        "default_mandate": null,
+        "payment_method_options": null,
+        "payment_method_types": null
+      },
+      "period_end": 1770027022,
+      "period_start": 1770027022,
+      "post_payment_credit_notes_amount": 0,
+      "pre_payment_credit_notes_amount": 0,
+      "receipt_number": null,
+      "rendering": null,
+      "shipping_cost": null,
+      "shipping_details": null,
+      "starting_balance": 0,
+      "statement_descriptor": null,
+      "status": "paid",
+      "status_transitions": {
+        "finalized_at": 1770027022,
+        "marked_uncollectible_at": null,
+        "paid_at": 1770027022,
+        "voided_at": null
+      },
+      "subtotal": 1500,
+      "subtotal_excluding_tax": 1500,
+      "test_clock": null,
+      "total": 1500,
+      "total_discount_amounts": [],
+      "total_excluding_tax": 1500,
+      "total_pretax_credit_amounts": [],
+      "total_taxes": [],
+      "webhooks_delivered_at": null
+    }
+  },
+  "livemode": false,
+  "pending_webhooks": 2,
+  "request": {
+    "id": "req_qBdl26uWIXoMeY",
+    "idempotency_key": "caf6fcfd-d493-4a14-acda-444b409e126b"
+  },
+  "type": "invoice.payment_succeeded"
+}

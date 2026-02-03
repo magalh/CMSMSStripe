@@ -7,9 +7,24 @@ $vars = $smarty->getTemplateVars('cmsms_stripe');
 
 try {
 	$stripe = new \Stripe\StripeClient($vars->secret);
-	$subscriptions = $stripe->subscriptions->all(['limit' => 100]);
+	$subscriptions = $stripe->subscriptions->all([
+		'limit' => 100,
+		'expand' => ['data.customer', 'data.default_payment_method']
+	]);
+	
+	// Manually expand products for each subscription
+	foreach($subscriptions->data as $sub) {
+		if(isset($sub->items->data[0]->price->product)) {
+			$product_id = $sub->items->data[0]->price->product;
+			if(is_string($product_id)) {
+				$sub->items->data[0]->price->product = $stripe->products->retrieve($product_id);
+			}
+		}
+	}
 } catch(\Exception $e) {
-	$this->DisplayErrorMessage($e->getMessage());
+} catch(\Exception $e) {
+	$this->SetError($e->getMessage());
+	$this->RedirectToAdminTab();
 	return;
 }
 

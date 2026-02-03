@@ -1,0 +1,23 @@
+{
+  "id": "evt_1SvIBsCq8GtG5fva17e2gMlr",
+  "object": "event",
+  "api_version": "2026-01-28.clover",
+  "created": 1769781450,
+  "data": {
+    "object": {
+      "id": "in_1SvIBsCq8GtG5fva8S0RUajs",
+      "object": "invoice",
+      "customer": "cus_Tt064SZ9ZWqfSu",
+      "subscription": "sub_1SvIBsCq8GtG5fvalWR1SeXA",
+      "amount_due": 9900,
+      "amount_paid": 0,
+      "amount_remaining": 9900,
+      "currency": "eur",
+      "status": "open",
+      "attempt_count": 1,
+      "attempted": true
+    }
+  },
+  "livemode": false,
+  "type": "invoice.payment_failed"
+}

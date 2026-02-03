@@ -1,0 +1,29 @@
+{
+  "id": "evt_1SvIBsCq8GtG5fva0MPQENOW",
+  "object": "event",
+  "api_version": "2026-01-28.clover",
+  "created": 1769781430,
+  "data": {
+    "object": {
+      "id": "ch_1SvIBsCq8GtG5fva0fKconNN",
+      "object": "charge",
+      "amount": 9900,
+      "amount_refunded": 9900,
+      "currency": "eur",
+      "customer": "cus_Tt064SZ9ZWqfSu",
+      "refunded": true,
+      "refunds": {
+        "data": [
+          {
+            "id": "re_1SvIBsCq8GtG5fva",
+            "amount": 9900,
+            "currency": "eur",
+            "payment_intent": "pi_1SvIBsCq8GtG5fva01cfEPIY"
+          }
+        ]
+      }
+    }
+  },
+  "livemode": false,
+  "type": "charge.refunded"
+}

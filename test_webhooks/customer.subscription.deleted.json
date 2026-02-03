@@ -1,0 +1,32 @@
+{
+  "id": "evt_1SvIBsCq8GtG5fvasT4g1p9d",
+  "object": "event",
+  "api_version": "2026-01-28.clover",
+  "created": 1769781500,
+  "data": {
+    "object": {
+      "id": "sub_1SvIBsCq8GtG5fvalWR1SeXA",
+      "object": "subscription",
+      "currency": "eur",
+      "customer": "cus_Tt064SZ9ZWqfSu",
+      "status": "canceled",
+      "canceled_at": 1769781500,
+      "items": {
+        "data": [
+          {
+            "id": "si_Tt4KDCalTbXZ8m",
+            "price": {
+              "id": "price_1SuwG2Cq8GtG5fvam54dOlaa",
+              "product": "prod_TshfS36tQDdT85",
+              "unit_amount": 9900
+            },
+            "subscription": "sub_1SvIBsCq8GtG5fvalWR1SeXA"
+          }
+        ]
+      },
+      "latest_invoice": "in_1SvIBsCq8GtG5fva8S0RUajs"
+    }
+  },
+  "livemode": false,
+  "type": "customer.subscription.deleted"
+}

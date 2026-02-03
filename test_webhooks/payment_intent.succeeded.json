@@ -1,0 +1,18 @@
+{
+  "id": "evt_1SvIBsCq8GtG5fva0Jf4XRgb",
+  "object": "event",
+  "api_version": "2026-01-28.clover",
+  "created": 1769781415,
+  "data": {
+    "object": {
+      "id": "pi_1SvIBsCq8GtG5fva01cfEPIY",
+      "object": "payment_intent",
+      "amount": 9900,
+      "currency": "eur",
+      "customer": "cus_Tt064SZ9ZWqfSu",
+      "status": "succeeded"
+    }
+  },
+  "livemode": false,
+  "type": "payment_intent.succeeded"
+}

@@ -9,24 +9,6 @@ $db = $this->GetDb();
 $dict = NewDataDictionary($db);
 $taboptarray = array('mysql' => 'TYPE=MyISAM');
 
-$flds = "id I KEY AUTO,
-         order_id      I NOTNULL,
-         amount        F,
-         payment_date  I,
-         status        C(50),
-         method        C(50),
-         gateway       C(50),
-         cc_number     B,
-         cc_expiry     I,
-         cc_verifycode B,
-	     confirmation_num C(255),
-         txn_id        C(255),
-         notes         X,
-         assocdata     X
-";
-$sqlarray = $dict->CreateTableSQL(cms_db_prefix()."module_cmsmsstripe_payments", $flds, $taboptarray);
-$dict->ExecuteSQLArray($sqlarray);
-
 $flds = "event_id C(255) KEY,
          event_type C(100),
          created_at I
@@ -34,19 +16,27 @@ $flds = "event_id C(255) KEY,
 $sqlarray = $dict->CreateTableSQL(cms_db_prefix()."module_cmsmsstripe_events", $flds, $taboptarray);
 $dict->ExecuteSQLArray($sqlarray);
 
+
 $this->AddEventHandler('MAMS', 'OnLogin', false);
 $this->AddEventHandler('MAMS', 'OnLogout', false);
+$this->AddEventHandler('MAMS', 'OnExpireUser', false);
 $this->AddEventHandler('MAMS', 'OnCreateUser', false);
 $this->AddEventHandler('MAMS', 'OnUpdateUser', false);
 $this->AddEventHandler('MAMSRegistration', 'onUserRegistered', false);
 
-$this->CreateEvent('SessionCreated');
-$this->CreateEvent('PaymentCompleted');
-$this->CreateEvent('PaymentFailed');
-$this->CreateEvent('SubscriptionCreated');
-$this->CreateEvent('SubscriptionUpdated');
-$this->CreateEvent('SubscriptionExpired');
-$this->CreateEvent('InvoicePaymentFailed');
+$this->CreateEvent('SessionCreated'); // custom
+$this->CreateEvent('SessionCompleted'); // checkout.session.completed
+$this->CreateEvent('PaymentCompleted'); // payment_intent.succeeded
+$this->CreateEvent('PaymentFailed'); // payment_intent.payment_failed
+$this->CreateEvent('SubscriptionCreated'); // customer.subscription.created
+$this->CreateEvent('SubscriptionUpdated'); // customer.subscription.updated
+$this->CreateEvent('SubscriptionDeleted'); // customer.subscription.deleted
+$this->CreateEvent('SubscriptionPaused'); // customer.subscription.paused
+$this->CreateEvent('SubscriptionResumed'); // customer.subscription.resumed
+$this->CreateEvent('InvoicePaid'); // invoice.paid
+$this->CreateEvent('InvoicePaymentFailed'); // invoice.payment_failed
+$this->CreateEvent('InvoiceFinalized'); // invoice.finalized
+$this->CreateEvent('RefundIssued'); // charge.refunded
 
 try {
 	$uid = max(1, get_userid(FALSE));

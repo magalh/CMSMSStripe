@@ -1,0 +1,133 @@
+{
+  "id": "evt_1SvIBwCq8GtG5fvaGxIfaC1o",
+  "object": "event",
+  "api_version": "2026-01-28.clover",
+  "created": 1769781416,
+  "data": {
+    "object": {
+      "id": "cs_test_a1Vftf54prcV8YnOdtuH34z3yCCAqWkoq70Bskn7OzeF1ugNxNyCJV5qiA",
+      "object": "checkout.session",
+      "adaptive_pricing": {
+        "enabled": true
+      },
+      "after_expiration": null,
+      "allow_promotion_codes": null,
+      "amount_subtotal": 9900,
+      "amount_total": 9900,
+      "automatic_tax": {
+        "enabled": false,
+        "liability": null,
+        "provider": null,
+        "status": null
+      },
+      "billing_address_collection": null,
+      "branding_settings": {
+        "background_color": "#ffffff",
+        "border_style": "rounded",
+        "button_color": "#0074d4",
+        "display_name": "PixelSandbox",
+        "font_family": "default",
+        "icon": null,
+        "logo": null
+      },
+      "cancel_url": "https://pixelsolutions.local/account/downloads/",
+      "client_reference_id": null,
+      "client_secret": null,
+      "collected_information": {
+        "business_name": null,
+        "individual_name": null,
+        "shipping_details": null
+      },
+      "consent": null,
+      "consent_collection": null,
+      "created": 1769781080,
+      "currency": "eur",
+      "currency_conversion": null,
+      "custom_fields": [],
+      "custom_text": {
+        "after_submit": null,
+        "shipping_address": null,
+        "submit": null,
+        "terms_of_service_acceptance": null
+      },
+      "customer": "cus_Tt064SZ9ZWqfSu",
+      "customer_account": null,
+      "customer_creation": null,
+      "customer_details": {
+        "address": {
+          "city": "Milano",
+          "country": "IT",
+          "line1": "Via Giorgio Washington, 49",
+          "line2": "",
+          "postal_code": "20146",
+          "state": "MI"
+        },
+        "business_name": null,
+        "email": "h_magal@hotmail.com",
+        "individual_name": null,
+        "name": "Magal Hezi",
+        "phone": null,
+        "tax_exempt": "none",
+        "tax_ids": []
+      },
+      "customer_email": null,
+      "discounts": [],
+      "expires_at": 1769867480,
+      "invoice": "in_1SvIBsCq8GtG5fva8S0RUajs",
+      "invoice_creation": null,
+      "livemode": false,
+      "locale": null,
+      "metadata": {},
+      "mode": "subscription",
+      "origin_context": null,
+      "payment_intent": null,
+      "payment_link": null,
+      "payment_method_collection": "always",
+      "payment_method_configuration_details": null,
+      "payment_method_options": {
+        "card": {
+          "request_three_d_secure": "automatic"
+        }
+      },
+      "payment_method_types": [
+        "card"
+      ],
+      "payment_status": "paid",
+      "permissions": null,
+      "phone_number_collection": {
+        "enabled": false
+      },
+      "recovered_from": null,
+      "saved_payment_method_options": {
+        "allow_redisplay_filters": [
+          "always"
+        ],
+        "payment_method_remove": "disabled",
+        "payment_method_save": null
+      },
+      "setup_intent": null,
+      "shipping_address_collection": null,
+      "shipping_cost": null,
+      "shipping_options": [],
+      "status": "complete",
+      "submit_type": null,
+      "subscription": "sub_1SvIBsCq8GtG5fvalWR1SeXA",
+      "success_url": "https://pixelsolutions.local/index.php?mact=CMSMSStripe,cntnt01,success,0&cntnt01session_id={CHECKOUT_SESSION_ID}",
+      "total_details": {
+        "amount_discount": 0,
+        "amount_shipping": 0,
+        "amount_tax": 0
+      },
+      "ui_mode": "hosted",
+      "url": null,
+      "wallet_options": null
+    }
+  },
+  "livemode": false,
+  "pending_webhooks": 2,
+  "request": {
+    "id": null,
+    "idempotency_key": null
+  },
+  "type": "checkout.session.completed"
+}

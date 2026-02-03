@@ -8,8 +8,10 @@
 <table class="pagetable" id="products_table">
   <thead>
     <tr>
+      <th>Product ID</th>
       <th>Name</th>
       <th>Description</th>
+      <th>Default Price</th>
       <th>Active</th>
       <th>Created</th>
       <th class="pageicon">&nbsp;</th>
@@ -20,8 +22,19 @@
   <tbody>
     {foreach $products as $product}
     <tr class="{cycle values='row1,row2'}">
+      <td>{$product->id}</td>
       <td><a href="{cms_action_url action=admin_edit_product product_id=$product->id}">{$product->name}</a></td>
       <td>{$product->description|truncate:50}</td>
+      <td>
+        {if $product->default_price && $product->default_price->unit_amount}
+          {($product->default_price->unit_amount / 100)|string_format:'%.2f'} {$product->default_price->currency|upper}
+          {if $product->default_price->type == 'recurring'}
+            / {$product->default_price->recurring->interval}
+          {/if}
+        {else}
+          -
+        {/if}
+      </td>
       <td>{if $product->active}Yes{else}No{/if}</td>
       <td>{$product->created|date_format:'%Y-%m-%d %H:%M'}</td>
       <td>

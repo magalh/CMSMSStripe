@@ -4,19 +4,22 @@
 <table class="pagetable">
   <thead>
     <tr>
+      <th>Subscription ID</th>
       <th>Customer</th>
       <th>Status</th>
       <th>Plan</th>
       <th>Amount</th>
       <th>Interval</th>
       <th>Current Period</th>
-      <th>Actions</th>
+      <th class="pageicon">{* edit icon *}</th>
+      <th class="pageicon">{* delete icon *}</th>
     </tr>
   </thead>
   <tbody>
     {foreach $subscriptions as $sub}
     <tr>
-      <td>{if $sub->customer->email}{$sub->customer->email}{else}{$sub->customer}{/if}</td>
+      <td>{$sub->id}</td>
+      <td>{$sub->customer->email}</td>
       <td>
         {if $sub->status == 'active'}
         <span class="badge badge-success">Active</span>
@@ -39,6 +42,7 @@
           {admin_icon icon='view.gif' alt='View'}
         </a>
       </td>
+      <td>{* delete link will go here *}</td>
     </tr>
     {/foreach}
   </tbody>

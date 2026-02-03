@@ -5,7 +5,7 @@ if( !$this->CheckPermission(CMSMSStripe::MANAGE_PERM) ) return;
 $product_id = \xt_param::get_string($params, 'product_id');
 if(!$product_id) {
 	$this->SetError($this->Lang('error'));
-	$this->RedirectToAdminTab('products');
+	$this->RedirectToAdminTab();
 }
 
 $this->validate_config();
@@ -19,5 +19,6 @@ try {
 	$this->SetError($e->getMessage());
 }
 
-$this->RedirectToAdminTab('products');
+$this->RedirectToAdminTab('','','admin_products');
+
 ?>

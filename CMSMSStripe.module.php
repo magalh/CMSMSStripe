@@ -32,7 +32,7 @@ class CMSMSStripe extends CMSModule
 	const TRANSACTIONS_PERM = 'view_stripe_transactions';
 	const SUBSCRIPTIONS_PERM = 'manage_stripe_subscriptions';
 	
-	public function GetVersion() { return '2.0.10'; }
+	public function GetVersion() { return '2.0.13'; }
 	public function MinimumCMSVersion() {
         return '2.2.16';
     }

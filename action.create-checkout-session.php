@@ -19,9 +19,17 @@ $session_params = [
 		'price' => $params['price_id'],
 		'quantity' => 1,
 	]],
+	'name_collection' => [
+    'business' => ['enabled' => true, 'optional' => true],
+    'individual' => [
+      'enabled' => true
+    ]],
 	'mode' => 'payment',
 	'automatic_tax' => [
 		'enabled' => true,
+	],
+	'tax_id_collection' => [
+		'enabled' => true
 	],
 	'success_url' => CMS_ROOT_URL.'/index.php?mact=CMSMSStripe,cntnt01,success,0&cntnt01session_id={CHECKOUT_SESSION_ID}',
 	'cancel_url' => $cancel_url,
@@ -32,14 +40,17 @@ $mams = \cms_utils::get_module('MAMS');
 $success_page = $this->GetPreference('cmsms_stripe_success_page');
 if($success_page) {
 	$returnid = $mams->resolve_alias_or_id($success_page);
-	$session_params['success_url'] .= '&cntnt01returnid='.$returnid;
+	$session_params['success_url'] .= '&cntnt01returnid=' . $returnid;
 }
+
 
 $uid = $mams->LoggedInId();
 if($uid) {
 	$stripe_customer_id = $mams->GetUserPropertyFull('stripe_customer_id',$uid);
 	if($stripe_customer_id) {
+		$session_params['client_reference_id'] = $uid;
 		$session_params['customer'] = $stripe_customer_id;
+		$session_params['customer_update'] = ['name' => 'auto'];
 	}
 }
 
@@ -50,12 +61,16 @@ if($price->type === 'recurring') {
 
 $checkout_session = $stripe->checkout->sessions->create($session_params);
 
-\CMSMS\HookManager::do_hook('CMSMSStripe::StripeSessionCreated', [
+$hook_data = [
 	'session_id' => $checkout_session->id,
 	'amount' => $checkout_session->amount_total / 100,
 	'currency' => $checkout_session->currency,
-	'customer' => $checkout_session->customer ?? null
-]);
+];
+if($uid) {
+	$hook_data['client_reference_id'] = $uid;
+	$hook_data['email'] = $mams->GetUserName($uid);
+}
+\CMSMS\HookManager::do_hook('CMSMSStripe::SessionCreated', $hook_data);
 
 header("HTTP/1.1 303 See Other");
 header("Location: " . $checkout_session->url);

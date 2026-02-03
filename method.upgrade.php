@@ -105,12 +105,13 @@ if( version_compare($oldversion,'2.0.9') < 0 ) {
 }
 
 if( version_compare($oldversion,'2.0.10') < 0 ) {
-	$this->CreateEvent('SessionCreated');
+	$this->CreateEvent('SessionCompleted');
 	$this->CreateEvent('PaymentCompleted');
 	$this->CreateEvent('PaymentFailed');
 	$this->CreateEvent('SubscriptionCreated');
 	$this->CreateEvent('SubscriptionUpdated');
 	$this->CreateEvent('SubscriptionExpired');
+	$this->CreateEvent('RefundIssued');
 	$this->CreateEvent('InvoicePaymentFailed');
 	
 	$db = $this->GetDb();
@@ -122,6 +123,51 @@ if( version_compare($oldversion,'2.0.10') < 0 ) {
 	";
 	$sqlarray = $dict->CreateTableSQL(cms_db_prefix()."module_cmsmsstripe_events", $flds, $taboptarray);
 	$dict->ExecuteSQLArray($sqlarray);
+}
+
+if( version_compare($oldversion,'2.0.11') < 0 ) {
+	$db = $this->GetDb();
+	$table_exists = $db->GetOne("SHOW TABLES LIKE '".cms_db_prefix()."module_cmsmsstripe_events'");
+	if(!$table_exists) {
+		$dict = NewDataDictionary($db);
+		$taboptarray = array('mysql' => 'TYPE=MyISAM');
+		$flds = "event_id C(255) KEY,
+		         event_type C(100),
+		         created_at I
+		";
+		$sqlarray = $dict->CreateTableSQL(cms_db_prefix()."module_cmsmsstripe_events", $flds, $taboptarray);
+		$dict->ExecuteSQLArray($sqlarray);
+	}
+}
+
+if( version_compare($oldversion,'2.0.12') < 0 ) {
+	$this->CreateEvent('SessionCompleted');
+}
+
+if ( version_compare($oldversion,'2.0.13') < 0 ) {
+
+	$this->RemoveEvent('InvoicePaymentFailed'); // custom
+	$this->RemoveEvent('PaymentCompleted'); // checkout.session.completed
+	$this->RemoveEvent('PaymentFailed'); // payment_intent.succeeded
+	$this->RemoveEvent('SessionCompleted'); // payment_intent.payment_failed
+	$this->RemoveEvent('SessionCreated'); // customer.subscription.created
+	$this->RemoveEvent('SubscriptionCreated'); // customer.subscription.updated
+	$this->RemoveEvent('SubscriptionExpired'); // customer.subscription.deleted
+	$this->RemoveEvent('SubscriptionUpdated'); // customer.subscription.paused
+
+	$this->CreateEvent('SessionCreated'); // custom
+	$this->CreateEvent('SessionCompleted'); // checkout.session.completed
+	$this->CreateEvent('PaymentCompleted'); // payment_intent.succeeded
+	$this->CreateEvent('PaymentFailed'); // payment_intent.payment_failed
+	$this->CreateEvent('SubscriptionCreated'); // customer.subscription.created
+	$this->CreateEvent('SubscriptionUpdated'); // customer.subscription.updated
+	$this->CreateEvent('SubscriptionDeleted'); // customer.subscription.deleted
+	$this->CreateEvent('SubscriptionPaused'); // customer.subscription.paused
+	$this->CreateEvent('SubscriptionResumed'); // customer.subscription.resumed
+	$this->CreateEvent('InvoicePaid'); // invoice.paid
+	$this->CreateEvent('InvoicePaymentFailed'); // invoice.payment_failed
+	$this->CreateEvent('InvoiceFinalized'); // invoice.finalized
+	$this->CreateEvent('RefundIssued'); // charge.refunded
 }
 
 ?>

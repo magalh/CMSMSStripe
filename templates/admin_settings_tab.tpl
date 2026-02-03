@@ -76,7 +76,7 @@
  <input type="submit" name="{$actionid}submit" value="Save"/>
  </p>
 </div>
-{cms_action_url action=webhook}
+{$webhook_url}
 {form_end}
 
 <script>

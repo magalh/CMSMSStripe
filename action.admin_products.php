@@ -7,7 +7,11 @@ $vars = $smarty->getTemplateVars('cmsms_stripe');
 
 try {
 	$stripe = new \Stripe\StripeClient($vars->secret);
-	$products = $stripe->products->all(['limit' => 100]);
+	$products = $stripe->products->all([
+		'limit' => 100,
+		'active' => true,
+		'expand' => ['data.default_price']
+	]);
 } catch(\Exception $e) {
 	$this->DisplayErrorMessage($e->getMessage());
 	return;

@@ -20,16 +20,12 @@ if( isset($params['submit']) ) {
 
 $tpl = $smarty->CreateTemplate( $this->GetTemplateResource('admin_settings_tab.tpl'), null, null, $smarty );
 
-$mods = array("module"=>"CMSMSStripe","action"=>"webhook","forajax"=>true,"page"=>"tester");
-$actionurl = utils::module_action_link($mods,$smarty);
-echo $actionurl;
-echo '<br>';
-echo $this->create_url( '_m1', 'delete_file', $this->_returnid, array('upload_id'=>$this->id));;
-
 $xtensions = xt_utils::get_module('CMSMSExt');
 $currency_list = $xtensions->get_currency_list_options();
 asort($currency_list);
 $smarty->assign('currency_list',$currency_list);
+
+$webhook_url = CMS_ROOT_URL."/index.php?mact=CMSMSStripe,cntnt01,webhook,0&showtemplate=false";
 $smarty->assign('webhook_url',$webhook_url);
 
 $tpl->display();

@@ -5,11 +5,33 @@ try {
 	$this->validate_config();
 	$stripe = new \Stripe\StripeClient($this->GetPreference('cmsms_stripe_secret'));
 	
-	$products = $stripe->products->all(['active' => true, 'limit' => 100]);
+	$product_ids = isset($params['products']) ? explode(',', trim($params['products'])) : [];
+	
+	if(!empty($product_ids)) {
+		// Fetch specific products
+		$products_data = [];
+		foreach($product_ids as $product_id) {
+			$product_id = trim($product_id);
+			if($product_id) {
+				try {
+					$product = $stripe->products->retrieve($product_id);
+					if($product->active) {
+						$products_data[] = $product;
+					}
+				} catch(\Exception $e) {
+					// Skip invalid product IDs
+				}
+			}
+		}
+	} else {
+		// Fetch all active products
+		$products = $stripe->products->all(['active' => true, 'limit' => 100]);
+		$products_data = $products->data;
+	}
 	
 	$current_url = \xt_url::current_url();
 	$product_list = [];
-	foreach($products->data as $product) {
+	foreach($products_data as $product) {
 		if($product->default_price) {
 			$price = $stripe->prices->retrieve($product->default_price);
 			$product->price_formatted = number_format($price->unit_amount / 100, 2) . ' ' . strtoupper($price->currency);

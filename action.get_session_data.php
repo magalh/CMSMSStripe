@@ -2,7 +2,10 @@
 if(!defined('CMS_VERSION')) exit;
 
 $session_id = isset($params['session_id']) ? $params['session_id'] : '';
-if(!$session_id ) throw new \Exception("Session ID is required.");
+
+if(!$session_id) {
+	return;
+}
 
 try {
 	$this->validate_config();
@@ -33,29 +36,20 @@ try {
 	}
 	
 	$mams = \cms_utils::get_module('MAMS');
-	$isuser = false;
+	$user_registered = false;
 	if($customer->email) {
 		$uid = $mams->GetUserID($customer->email);
-		$isuser = ($uid > 0);
+		$user_registered = ($uid > 0);
 	}
 	
-	$smarty->assignGlobal('session_id', $session->id);
-	$smarty->assign('customer', $customer_data);
-	$smarty->assign('customer_email', $customer_data["email"]);
-	$smarty->assign('subscription', $subscription_data);
-	$smarty->assign('isuser', $isuser);
-	$smarty->assign('amount', number_format($session->amount_total / 100, 2));
-	$smarty->assign('currency', strtoupper($session->currency));
-	
-	$template = \CMSMSStripe\utils::find_layout_template($params, 'template', 'CMSMSStripe::payment_success');
-	if(!$template) {
-		$template = 'success';
-	}
-	
-	$tpl = $smarty->CreateTemplate($this->GetTemplateResource($template), null, null, $smarty);
-	$tpl->display();
+	$smarty->assign('stripe_session_id', $session->id);
+	$smarty->assign('stripe_customer', $customer_data);
+	$smarty->assign('stripe_subscription', $subscription_data);
+	$smarty->assign('stripe_user_registered', $user_registered);
+	$smarty->assign('stripe_amount', number_format($session->amount_total / 100, 2));
+	$smarty->assign('stripe_currency', strtoupper($session->currency));
 	
 } catch(\Exception $e) {
-	echo '<p class="error">Error: ' . $e->getMessage() . '</p>';
+	// Silent fail
 }
 ?>
