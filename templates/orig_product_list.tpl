@@ -1,39 +1,51 @@
-<div class="card card-transparent">
-  <div class="card-header">
-    <div class="card-title">Products</div>
-  </div>
-  <div class="card-body">
-    {if isset($products) && count($products) > 0}
-    <div class="row">
-      {foreach $products as $product}
-      <div class="col-lg-4">
-        <div class="card card-default">
-          <div class="card-header">
-            <div class="card-title">{$product->name}</div>
+{if isset($products) && count($products) > 0}
+  <section>
+      <div class="container">
+          <div class="row">
+              <div class="col-sm-12 text-center">
+                  <h1 class="thin mb80 mb-xs-24">Pricing? That's easy.</h1>
+              </div>
           </div>
-          <div class="card-body">
-            {if $product->images && count($product->images) > 0}
-            <img src="{$product->images[0]}" alt="{$product->name}" class="img-fluid mb-3">
-            {/if}
-            <p>{$product->description}</p>
-            {if $product->default_price}
-            <h4 class="text-primary">{$product->price_formatted}
-            {if $product->recurring}
-            <span class="text-muted">/ {$product->interval}</span>
-            {/if}
-            </h4>
-            <div class="mt-3">
-              <a href="{$product->checkout_url}" class="btn btn-primary">Purchase</a>
-              <a href="{cms_action_url action='detail' product_id=$product->id}" class="btn btn-default">View Details</a>
-            </div>
-            {/if}
+          <!--end of row-->
+          <div class="row">
+          {assign var="col_size" value=12/count($products)}
+          {if $col_size > 4}{assign var="col_size" value=4}{/if}
+          {foreach $products as $product}
+              <div class="col-md-{$col_size} col-sm-6{if count($products) == 2 && $product@first} col-md-offset-2{/if}" id="{$product->id}">
+                  <div class="pricing-table pt-1 text-center {if $product@index == 1} boxed{/if}{if $product@index == 2} emphasis{/if}">
+                      <h5 class="uppercase">{$product->name}</h5>
+                      <span class="price">{$product->currency_symbol}{$product->price_amount}</span>
+                      {if $product->recurring}
+                      <p class="lead">Per {$product->interval|capitalize}</p>
+                      {else}
+                      <p class="lead">One-time Payment</p>
+                      {/if}
+                      <a class="btn btn-lg {if $product@index == 2}btn-white{else}btn-filled{/if}" href="{$product->checkout_url}">Get Started</a>
+                      {if $product->description}
+                      <p>{$product->description}</p>
+                      {/if}
+                  </div>
+                  <!--end of pricing table-->
+              </div>
+          {/foreach}
           </div>
-        </div>
+          <!--end of row-->
       </div>
-      {/foreach}
-    </div>
-    {else}
-    <p>No products available.</p>
-    {/if}
-  </div>
-</div>
+      <!--end of container-->
+      <div class="embelish-icons">
+          <i class="ti-marker"></i>
+          <i class="ti-layout"></i>
+          <i class="ti-ruler-alt-2"></i>
+          <i class="ti-eye"></i>
+          <i class="ti-signal"></i>
+          <i class="ti-pulse"></i>
+          <i class="ti-marker"></i>
+          <i class="ti-layout"></i>
+          <i class="ti-ruler-alt-2"></i>
+          <i class="ti-eye"></i>
+          <i class="ti-signal"></i>
+          <i class="ti-pulse"></i>
+      </div>
+  </section>
+{/if}          
+   

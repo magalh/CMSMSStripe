@@ -4,6 +4,33 @@ if(!defined('CMS_VERSION')) exit;
 $submitted = isset($params['submit']);
 $email = isset($params['email']) ? trim($params['email']) : '';
 $auto_redirect = isset($params['auto_redirect']) && $params['auto_redirect'] == '1';
+$return_url = isset($params['returnto']) ? $params['returnto'] : CMS_ROOT_URL;
+
+if($params['link']) {
+	$this->validate_config();
+	$stripe = new \Stripe\StripeClient($this->GetPreference('cmsms_stripe_secret'));
+	$portal_session = $stripe->billingPortal->sessions->create([
+		'customer' => $params['cid'],
+		'return_url' => $return_url,
+	]);
+	$session_url = $portal_session->url;
+	if ($params['email']) {
+		$session_url .= '?prefilled_email=' . urlencode($params['email']);
+	}
+	header('Location: ' . $session_url);
+	exit();
+}
+
+if(isset($params['cid']) && $params['print']) {
+	$this->validate_config();
+	$stripe = new \Stripe\StripeClient($this->GetPreference('cmsms_stripe_secret'));
+	$portal_session = $stripe->billingPortal->sessions->create([
+		'customer' => $params['sid'],
+		'return_url' => $return_url,
+	]);
+	$smarty->assign(\trim($params['print']), $portal_session->url);
+	return;
+}
 
 if($auto_redirect && $email) {
 	try {
@@ -14,7 +41,6 @@ if($auto_redirect && $email) {
 		
 		if(!empty($customers->data)) {
 			$customer = $customers->data[0];
-			$return_url = isset($params['returnto']) ? $params['returnto'] : CMS_ROOT_URL;
 			$portal_session = $stripe->billingPortal->sessions->create([
 				'customer' => $customer->id,
 				'return_url' => $return_url,
@@ -42,7 +68,6 @@ if($submitted && $email) {
 			$customer = $customers->data[0];
 			
 			// Create portal session
-			$return_url = isset($params['returnto']) ? $params['returnto'] : CMS_ROOT_URL;
 			$portal_session = $stripe->billingPortal->sessions->create([
 				'customer' => $customer->id,
 				'return_url' => $return_url,

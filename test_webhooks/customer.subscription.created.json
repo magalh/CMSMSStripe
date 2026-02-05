@@ -1,31 +1,192 @@
 {
-  "id": "evt_1SvIBsCq8GtG5fvaT3BMIIgF",
+  "id": "evt_1SxQBqCq8GtG5fvaoecesmf9",
   "object": "event",
   "api_version": "2026-01-28.clover",
-  "created": 1769781412,
+  "created": 1770288815,
   "data": {
     "object": {
-      "id": "sub_1SvIBsCq8GtG5fvalWR1SeXA",
+      "id": "sub_1SxQBlCq8GtG5fvaJdeRboEE",
       "object": "subscription",
+      "application": null,
+      "application_fee_percent": null,
+      "automatic_tax": {
+        "disabled_reason": null,
+        "enabled": true,
+        "liability": {
+          "type": "self"
+        }
+      },
+      "billing_cycle_anchor": 1770288813,
+      "billing_cycle_anchor_config": null,
+      "billing_mode": {
+        "flexible": null,
+        "type": "classic"
+      },
+      "billing_thresholds": null,
+      "cancel_at": null,
+      "cancel_at_period_end": false,
+      "canceled_at": null,
+      "cancellation_details": {
+        "comment": null,
+        "feedback": null,
+        "reason": null
+      },
+      "collection_method": "charge_automatically",
+      "created": 1770288813,
       "currency": "eur",
-      "customer": "cus_Tt064SZ9ZWqfSu",
-      "status": "active",
+      "customer": "cus_TuEBRuyYXD0Qny",
+      "customer_account": null,
+      "days_until_due": null,
+      "default_payment_method": null,
+      "default_source": null,
+      "default_tax_rates": [],
+      "description": null,
+      "discounts": [],
+      "ended_at": null,
+      "invoice_settings": {
+        "account_tax_ids": null,
+        "issuer": {
+          "type": "self"
+        }
+      },
       "items": {
+        "object": "list",
         "data": [
           {
-            "id": "si_Tt4KDCalTbXZ8m",
-            "price": {
-              "id": "price_1SuwG2Cq8GtG5fvam54dOlaa",
-              "product": "prod_TshfS36tQDdT85",
-              "unit_amount": 9900
+            "id": "si_TvGjF1qa6lVnmR",
+            "object": "subscription_item",
+            "billing_thresholds": null,
+            "created": 1770288814,
+            "current_period_end": 1801824813,
+            "current_period_start": 1770288813,
+            "discounts": [],
+            "metadata": {},
+            "plan": {
+              "id": "price_1SwgkMCq8GtG5fva9eQtIWyM",
+              "object": "plan",
+              "active": true,
+              "amount": 4900,
+              "amount_decimal": "4900",
+              "billing_scheme": "per_unit",
+              "created": 1770114134,
+              "currency": "eur",
+              "interval": "year",
+              "interval_count": 1,
+              "livemode": false,
+              "metadata": {},
+              "meter": null,
+              "nickname": null,
+              "product": "prod_TuVlxknwGHJYqp",
+              "tiers_mode": null,
+              "transform_usage": null,
+              "trial_period_days": null,
+              "usage_type": "licensed"
             },
-            "subscription": "sub_1SvIBsCq8GtG5fvalWR1SeXA"
+            "price": {
+              "id": "price_1SwgkMCq8GtG5fva9eQtIWyM",
+              "object": "price",
+              "active": true,
+              "billing_scheme": "per_unit",
+              "created": 1770114134,
+              "currency": "eur",
+              "custom_unit_amount": null,
+              "livemode": false,
+              "lookup_key": null,
+              "metadata": {},
+              "nickname": null,
+              "product": "prod_TuVlxknwGHJYqp",
+              "recurring": {
+                "interval": "year",
+                "interval_count": 1,
+                "meter": null,
+                "trial_period_days": null,
+                "usage_type": "licensed"
+              },
+              "tax_behavior": "inclusive",
+              "tiers_mode": null,
+              "transform_quantity": null,
+              "type": "recurring",
+              "unit_amount": 4900,
+              "unit_amount_decimal": "4900"
+            },
+            "quantity": 1,
+            "subscription": "sub_1SxQBlCq8GtG5fvaJdeRboEE",
+            "tax_rates": []
           }
-        ]
+        ],
+        "has_more": false,
+        "total_count": 1,
+        "url": "/v1/subscription_items?subscription=sub_1SxQBlCq8GtG5fvaJdeRboEE"
       },
-      "latest_invoice": "in_1SvIBsCq8GtG5fva8S0RUajs"
+      "latest_invoice": "in_1SxQBlCq8GtG5fvaSgLdhn2L",
+      "livemode": false,
+      "metadata": {},
+      "next_pending_invoice_item_invoice": null,
+      "on_behalf_of": null,
+      "pause_collection": null,
+      "payment_settings": {
+        "payment_method_options": {
+          "acss_debit": null,
+          "bancontact": null,
+          "card": {
+            "network": null,
+            "request_three_d_secure": "automatic"
+          },
+          "customer_balance": null,
+          "konbini": null,
+          "payto": null,
+          "sepa_debit": null,
+          "us_bank_account": null
+        },
+        "payment_method_types": [
+          "card"
+        ],
+        "save_default_payment_method": "off"
+      },
+      "pending_invoice_item_interval": null,
+      "pending_setup_intent": null,
+      "pending_update": null,
+      "plan": {
+        "id": "price_1SwgkMCq8GtG5fva9eQtIWyM",
+        "object": "plan",
+        "active": true,
+        "amount": 4900,
+        "amount_decimal": "4900",
+        "billing_scheme": "per_unit",
+        "created": 1770114134,
+        "currency": "eur",
+        "interval": "year",
+        "interval_count": 1,
+        "livemode": false,
+        "metadata": {},
+        "meter": null,
+        "nickname": null,
+        "product": "prod_TuVlxknwGHJYqp",
+        "tiers_mode": null,
+        "transform_usage": null,
+        "trial_period_days": null,
+        "usage_type": "licensed"
+      },
+      "quantity": 1,
+      "schedule": null,
+      "start_date": 1770288813,
+      "status": "incomplete",
+      "test_clock": null,
+      "transfer_data": null,
+      "trial_end": null,
+      "trial_settings": {
+        "end_behavior": {
+          "missing_payment_method": "create_invoice"
+        }
+      },
+      "trial_start": null
     }
   },
   "livemode": false,
+  "pending_webhooks": 2,
+  "request": {
+    "id": null,
+    "idempotency_key": "1c8f3d7e-bb39-4b61-bcf1-979891a1c27c"
+  },
   "type": "customer.subscription.created"
 }

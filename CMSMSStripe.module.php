@@ -32,7 +32,7 @@ class CMSMSStripe extends CMSModule
 	const TRANSACTIONS_PERM = 'view_stripe_transactions';
 	const SUBSCRIPTIONS_PERM = 'manage_stripe_subscriptions';
 	
-	public function GetVersion() { return '2.0.13'; }
+	public function GetVersion() { return '2.0.15'; }
 	public function MinimumCMSVersion() {
         return '2.2.16';
     }
@@ -50,6 +50,8 @@ class CMSMSStripe extends CMSModule
     public function GetEventHelp( $eventname ) { return $this->lang('event_help_' . $eventname); }
 
 	public function InitializeFrontend() {
+		$this->SetParameterType('sid',CLEAN_STRING);
+		$this->SetParameterType('assign',CLEAN_STRING);
 		$this->RegisterModulePlugin();
 	}
 	
@@ -95,7 +97,7 @@ class CMSMSStripe extends CMSModule
 			$obj = new CmsAdminMenuItem();
 			$obj->module = $this->GetName();
 			$obj->section = 'siteadmin';
-			$obj->title = 'Stripe Settings';
+			$obj->title = 'Settings - Stripe';
 			$obj->description = 'Manage Stripe Module Settings';
 			$obj->action = 'defaultadmin';
 			$obj->url = $this->create_url('m1_', $obj->action);

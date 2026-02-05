@@ -16,6 +16,17 @@ $flds = "event_id C(255) KEY,
 $sqlarray = $dict->CreateTableSQL(cms_db_prefix()."module_cmsmsstripe_events", $flds, $taboptarray);
 $dict->ExecuteSQLArray($sqlarray);
 
+$flds = "id I KEY AUTO,
+         subscription_id C(255),
+         event_id C(255),
+         module_name C(100),
+         user_id I,
+         action C(255),
+         created_at I
+";
+$sqlarray = $dict->CreateTableSQL(cms_db_prefix()."module_cmsmsstripe_audit", $flds, $taboptarray);
+$dict->ExecuteSQLArray($sqlarray);
+
 
 $this->AddEventHandler('MAMS', 'OnLogin', false);
 $this->AddEventHandler('MAMS', 'OnLogout', false);
@@ -37,6 +48,7 @@ $this->CreateEvent('InvoicePaid'); // invoice.paid
 $this->CreateEvent('InvoicePaymentFailed'); // invoice.payment_failed
 $this->CreateEvent('InvoiceFinalized'); // invoice.finalized
 $this->CreateEvent('RefundIssued'); // charge.refunded
+$this->CreateEvent('CheckoutSuccess');
 
 try {
 	$uid = max(1, get_userid(FALSE));

@@ -30,9 +30,12 @@ try {
 		$template = 'product_detail';
 	}
 	
+	$returnto = $params['returnto'] ?? $this->CreateFrontendLink('cntnt01', $returnid, 'summary', '', [], '', true);
+	
 	$tpl = $smarty->CreateTemplate($this->GetTemplateResource($template), null, null, $smarty);
 	$tpl->assign('product', $product);
 	$tpl->assign('checkout_url', $checkout_url);
+	$tpl->assign('returnto', $returnto);
 	$tpl->display();
 	
 } catch(\Exception $e) {

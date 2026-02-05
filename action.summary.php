@@ -31,10 +31,24 @@ try {
 	
 	$current_url = \xt_url::current_url();
 	$product_list = [];
+	
+	$currency_symbols = [
+		'usd' => '$', 'eur' => '€', 'gbp' => '£', 'jpy' => '¥',
+		'cad' => 'CA$', 'aud' => 'A$', 'chf' => 'CHF', 'cny' => '¥',
+		'sek' => 'kr', 'nzd' => 'NZ$', 'inr' => '₹', 'brl' => 'R$'
+	];
+	
 	foreach($products_data as $product) {
 		if($product->default_price) {
 			$price = $stripe->prices->retrieve($product->default_price);
-			$product->price_formatted = number_format($price->unit_amount / 100, 2) . ' ' . strtoupper($price->currency);
+			$currency_lower = strtolower($price->currency);
+			$symbol = $currency_symbols[$currency_lower] ?? strtoupper($price->currency);
+			
+			$amount = $price->unit_amount / 100;
+			$product->price_amount = ($amount == floor($amount)) ? number_format($amount, 0) : number_format($amount, 2);
+			$product->price_formatted = $symbol . $product->price_amount;
+			$product->price_amount = number_format($price->unit_amount / 100, 0);
+			$product->currency_symbol = $symbol;
 			$product->recurring = $price->type === 'recurring';
 			$product->price_id = $product->default_price;
 			if($product->recurring && isset($price->recurring->interval)) {
@@ -49,7 +63,7 @@ try {
 	if(!$template) {
 		$template = 'product_list';
 	}
-	
+
 	$tpl = $smarty->CreateTemplate($this->GetTemplateResource($template), null, null, $smarty);
 	$tpl->assign('products', $product_list);
 	$tpl->assign('actionid', $id);

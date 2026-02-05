@@ -62,23 +62,23 @@ if(!$skip_duplicate_check) {
 	$event_id = $db->qstr($event->id);
 	$check = $db->GetOne("SELECT event_id FROM ".cms_db_prefix()."module_cmsmsstripe_events WHERE event_id = {$event_id}");
 
-	if($check) {
+/*	if($check) {
+		http_response_code(500);
 		if($debug) {
-			\xt_utils::send_ajax_and_exit(['message' => 'Duplicate event ignored', 'event_id' => $event->id, 'code' => 200]);
-		} else {
-			http_response_code(200);
-			exit;
+			\xt_utils::send_ajax_and_exit(['message' => 'Duplicate event ignored', 'event_id' => $event->id]);
 		}
+		exit;
 	} else {
 		$event_type = $db->qstr($event->type);
 		$db->Execute("INSERT INTO ".cms_db_prefix()."module_cmsmsstripe_events (event_id, event_type, created_at) VALUES ({$event_id}, {$event_type}, ".time().")");
-	}
+	}*/
 }
 
 switch($event->type) {
 	case 'checkout.session.completed':
 		$session = $event->data->object;
 		$data = [
+			'event_id' => $event->id,
 			'session_id' => $session->id,
 			'customer_id' => $session->customer,
 			'customer_email' => $session->customer_details->email ?? null,
@@ -95,6 +95,7 @@ switch($event->type) {
 	case 'payment_intent.succeeded':
 		$payment_intent = $event->data->object;
 		$data = [
+			'event_id' => $event->id,
 			'payment_intent_id' => $payment_intent->id,
 			'amount' => $payment_intent->amount / 100,
 			'currency' => $payment_intent->currency,
@@ -105,6 +106,7 @@ switch($event->type) {
 	case 'invoice.payment_failed':
 		$payment_intent = $event->data->object;
 		$data = [
+			'event_id' => $event->id,
 			'payment_intent_id' => $payment_intent->id,
 			'amount' => $payment_intent->amount / 100,
 			'currency' => $payment_intent->currency,
@@ -116,6 +118,7 @@ switch($event->type) {
 	case 'customer.subscription.created':
 		$subscription = $event->data->object;
 		$data = [
+			'event_id' => $event->id,
 			'subscription_id' => $subscription->id,
 			'customer_id' => $subscription->customer,
 			'status' => $subscription->status
@@ -125,6 +128,7 @@ switch($event->type) {
 	case 'customer.subscription.updated':
 		$subscription = $event->data->object;
 		$data = [
+			'event_id' => $event->id,
 			'subscription_id' => $subscription->id,
 			'customer_id' => $subscription->customer,
 			'status' => $subscription->status
@@ -134,17 +138,39 @@ switch($event->type) {
 	case 'customer.subscription.deleted':
 		$subscription = $event->data->object;
 		$data = [
+			'event_id' => $event->id,
 			'subscription_id' => $subscription->id,
 			'customer_id' => $subscription->customer,
 			'status' => $subscription->status
 		];
-		\CMSMS\HookManager::do_hook('CMSMSStripe::SubscriptionExpired', $data);
+		\CMSMS\HookManager::do_hook('CMSMSStripe::SubscriptionDeleted', $data);
+		break;
+	case 'customer.subscription.paused':
+		$subscription = $event->data->object;
+		$data = [
+			'event_id' => $event->id,
+			'subscription_id' => $subscription->id,
+			'customer_id' => $subscription->customer,
+			'status' => $subscription->status
+		];
+		\CMSMS\HookManager::do_hook('CMSMSStripe::SubscriptionPaused', $data);
+		break;
+	case 'customer.subscription.resumed':
+		$subscription = $event->data->object;
+		$data = [
+			'event_id' => $event->id,
+			'subscription_id' => $subscription->id,
+			'customer_id' => $subscription->customer,
+			'status' => $subscription->status
+		];
+		\CMSMS\HookManager::do_hook('CMSMSStripe::SubscriptionResumed', $data);
 		break;
 	case 'charge.refunded':
 		$charge = $event->data->object;
 		if(isset($charge->refunds->data[0])) {
 			$refund = $charge->refunds->data[0];
 			$data = [
+				'event_id' => $event->id,
 				'refund_id' => $refund->id,
 				'amount' => $refund->amount / 100,
 				'currency' => $refund->currency,
@@ -156,6 +182,7 @@ switch($event->type) {
 	case 'invoice.payment_failed':
 		$invoice = $event->data->object;
 		$data = [
+			'event_id' => $event->id,
 			'invoice_id' => $invoice->id,
 			'customer_id' => $invoice->customer,
 			'amount_due' => $invoice->amount_due / 100,

@@ -42,9 +42,9 @@
 <div class="pageoverflow">
   <p class="pagetext"><label>{$mod->Lang('url_webhook_title')}:</label></p>
   <p class="pageinput">
-  <input type="text" name="{$actionid}cmsms_stripe_url_webhook" value="{$cmsms_stripe->url_webhook}" size="50"/>
+    {$webhook_url}
   </p>
-  {$webhook_url}
+  
   <span class="helptext smallgrey">{$mod->Lang('url_webhook_descr')}</span>
 </div>
 <div class="pageoverflow">
@@ -76,7 +76,6 @@
  <input type="submit" name="{$actionid}submit" value="Save"/>
  </p>
 </div>
-{$webhook_url}
 {form_end}
 
 <script>

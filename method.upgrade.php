@@ -170,4 +170,27 @@ if ( version_compare($oldversion,'2.0.13') < 0 ) {
 	$this->CreateEvent('RefundIssued'); // charge.refunded
 }
 
+if( version_compare($oldversion,'2.0.14') < 0 ) {
+	$db = $this->GetDb();
+	$table_exists = $db->GetOne("SHOW TABLES LIKE '".cms_db_prefix()."module_cmsmsstripe_audit'");
+	if(!$table_exists) {
+		$dict = NewDataDictionary($db);
+		$taboptarray = array('mysql' => 'TYPE=MyISAM');
+		$flds = "id I KEY AUTO,
+		         subscription_id C(255),
+		         event_id C(255),
+		         module_name C(100),
+		         user_id I,
+		         action C(255),
+		         created_at I
+		";
+		$sqlarray = $dict->CreateTableSQL(cms_db_prefix()."module_cmsmsstripe_audit", $flds, $taboptarray);
+		$dict->ExecuteSQLArray($sqlarray);
+	}
+}
+
+if( version_compare($oldversion,'2.0.15') < 0 ) {
+	$this->CreateEvent('CheckoutSuccess');
+}
+
 ?>
