@@ -45,6 +45,13 @@ if($success_page) {
 }
 
 
+$price = $stripe->prices->retrieve($params['price_id']);
+if($price->type === 'recurring') {
+	$session_params['mode'] = 'subscription';
+} else {
+	$session_params['invoice_creation'] = ['enabled' => true];
+}
+
 $uid = $mams->LoggedInId();
 if($uid) {
 	$stripe_customer_id = $mams->GetUserPropertyFull('stripe_customer_id',$uid);
@@ -53,15 +60,8 @@ if($uid) {
 		$session_params['customer'] = $stripe_customer_id;
 		$session_params['customer_update'] = ['name' => 'auto'];
 	}
-} else {
+} elseif($session_params['mode'] === 'payment') {
 	$session_params['customer_creation'] = 'always';
-}
-
-$price = $stripe->prices->retrieve($params['price_id']);
-if($price->type === 'recurring') {
-	$session_params['mode'] = 'subscription';
-} else {
-	$session_params['invoice_creation'] = ['enabled' => true];
 }
 
 $checkout_session = $stripe->checkout->sessions->create($session_params);
