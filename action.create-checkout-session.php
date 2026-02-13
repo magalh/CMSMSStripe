@@ -44,7 +44,6 @@ if($success_page) {
 	$session_params['success_url'] .= '&cntnt01returnid=' . $returnid;
 }
 
-
 $price = $stripe->prices->retrieve($params['price_id']);
 if($price->type === 'recurring') {
 	$session_params['mode'] = 'subscription';
