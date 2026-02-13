@@ -11,35 +11,73 @@ try {
 		'expand' => ['line_items', 'customer', 'subscription']
 	]);
 	
+	// Use customer if exists, otherwise use customer_details
 	$customer = $session->customer;
 	$subscription = $session->subscription;
-
-	$customer_data = [
-		'id' => $customer->id,
-		'email' => $customer->email,
-		'name' => $customer->name,
-		'business_name' => $customer->business_name,
-		'individual_name' => $customer->individual_name,
-		'country' => $customer->address->country ?? null,
-		'created' => $customer->created
-	];
 	
+	if($customer) {
+		// Customer object exists
+		$customer_data = [
+			'id' => $customer->id,
+			'email' => $customer->email,
+			'name' => $customer->name,
+			'business_name' => $customer->business_name ?? null,
+			'individual_name' => $customer->individual_name ?? null,
+			'country' => $customer->address->country ?? null,
+			'created' => $customer->created
+		];
+	} else {
+		// Use customer_details from session
+		$details = $session->customer_details;
+		$customer_data = [
+			'id' => null,
+			'email' => $details->email,
+			'name' => $details->name ?? $details->business_name ?? $details->individual_name,
+			'business_name' => $details->business_name ?? null,
+			'individual_name' => $details->individual_name ?? null,
+			'country' => $details->address->country ?? null,
+			'created' => $session->created
+		];
+	}
+
+	//\xt_utils::send_ajax_and_exit( $customer_data, true);
+
+	$product_id = null;
+	$product_name = null;
+	$product_type = null;
+	$credits = null;
+	
+	if($session->line_items && $session->line_items->data) {
+		$first_item = $session->line_items->data[0];
+		if($first_item->price->product) {
+			$product_id = $first_item->price->product;
+			$product = $stripe->products->retrieve($product_id);
+			$product_name = $product->name;
+			$product_type = $product->type;
+			
+			if(isset($first_item->price->metadata->credits)) {
+				$credits = $first_item->price->metadata->credits;
+			}
+		}
+	}
+
 	$subscription_data = null;
 	if($subscription) {
 		$subscription_data = [
 			'id' => $subscription->id,
-			'product_id' => $subscription->plan->product
+			'product_id' => $product_id,
+			'product_name' => $product_name
 		];
 	}
-	
+
 	$mams = \cms_utils::get_module('MAMS');
 	$isloggedin = $mams->LoggedIn();
 	$isuser = false;
 	$isnewuser = false;
 
-	if(!$customer->email) throw new \Exception("Customer email is required.");
+	if(!$customer_data['email']) throw new \Exception("Customer email is required.");
 
-	$uid = $mams->GetUserID($customer->email);
+	$uid = $mams->GetUserID($customer_data['email']);
 	$isuser = ($uid > 0);
 	
 	if($isloggedin) {
@@ -56,16 +94,20 @@ try {
 		$tmp = (int) $mams->GetPreference('expireage_months',520);
 		$expires = strtotime("+{$tmp} months 00:00");
 		if(!$expires) $expires = PHP_INT_MAX;
-		$result = $mams->AddUser($customer->email, $random_password, $expires);
+		$result = $mams->AddUser($customer_data['email'], $random_password, $expires);
 		$uid = $result[1];
 		$isuser = true;
 		$isnewuser = true;
 
 		$mams->AssignUserToGroup($uid, $stripe_gid);
-		$mams->SetUserPropertyFull('stripe_customer_id', $customer->id, $uid);
-		$mams->Login($customer->email, $random_password);
+		if($customer_data['id']) {
+			$mams->SetUserPropertyFull('stripe_customer_id', $customer_data['id'], $uid);
+		}
+		$mams->Login($customer_data['email'], $random_password);
 	} else {
-		$mams->SetUserPropertyFull('stripe_customer_id', $customer->id, $uid);
+		if($customer_data['id']) {
+			$mams->SetUserPropertyFull('stripe_customer_id', $customer_data['id'], $uid);
+		}
 		$uinfo = $mams->GetUserInfo($uid);
 		$mams->AssignUserToGroup($uid, $stripe_gid);
 		$smarty->assign('uinfo', $uinfo);
@@ -77,6 +119,9 @@ try {
 	$smarty->assign('customer', $customer_data);
 	$smarty->assign('customer_email', $customer_data["email"]);
 	$smarty->assign('subscription', $subscription_data);
+	$smarty->assign('product_id', $product_id);
+	$smarty->assign('product_name', $product_name);
+	$smarty->assign('product_type', $product_type);
 	$smarty->assign('isloggedin', $isloggedin);
 	$smarty->assign('isuser', $isuser);
 	$smarty->assign('isnewuser', $isnewuser);
@@ -89,17 +134,29 @@ try {
 
 	$data = [
 		'session_id' => $session->id,
-		'customer_id' => $customer->id,
-		'customer_email' => $customer->email,
-		'customer_name' => $customer->name,
+		'customer_id' => $customer_data['id'],
+		'customer_email' => $customer_data['email'],
+		'customer_name' => $customer_data['name'],
 		'user_id' => $uid ?? null,
 		'is_new_user' => $isnewuser,
-		'subscription_id' => $subscription->id ?? null,
-		'product_id' => $subscription_data['product_id'] ?? null,
+		'product_id' => $product_id,
+		'product_name' => $product_name,
 		'amount' => $session->amount_total / 100,
 		'currency' => $session->currency,
 		'payment_status' => $session->payment_status
 	];
+	
+	if($subscription) {
+		$data['subscription_id'] = $subscription_data['id'];
+		$data['product_type'] = "subscription";
+	}
+	
+	if($credits) {
+		$data['credits_total'] = $credits;
+		$data['product_type'] = "credits";
+	}
+
+	//\xt_utils::send_ajax_and_exit( $data );
 	
 	\CMSMS\HookManager::do_hook('CMSMSStripe::CheckoutSuccess', $data);
 	

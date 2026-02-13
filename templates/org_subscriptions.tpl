@@ -38,7 +38,7 @@
 								</div>
 							</div>
 							<div class="card-footer text-center">
-								<p><strong>License Key:</strong> {ProductLicenses action="license" subscription_id="{$sub->id}" product_id="{$sub->plan->product->id}"}</p>
+								<p><strong>License Key:</strong> {ProductLicenses action="license" subscription_id="{$sub->id}"}</p>
 							</div>
 						</div>
 					</div>

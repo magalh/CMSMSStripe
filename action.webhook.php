@@ -103,18 +103,6 @@ switch($event->type) {
 		];
 		\CMSMS\HookManager::do_hook('CMSMSStripe::PaymentCompleted', $data);
 		break;
-	case 'invoice.payment_failed':
-		$payment_intent = $event->data->object;
-		$data = [
-			'event_id' => $event->id,
-			'payment_intent_id' => $payment_intent->id,
-			'amount' => $payment_intent->amount / 100,
-			'currency' => $payment_intent->currency,
-			'customer' => $payment_intent->customer ?? null,
-			'error' => $payment_intent->last_payment_error->message ?? 'Unknown error'
-		];
-		\CMSMS\HookManager::do_hook('CMSMSStripe::PaymentFailed', $data);
-		break;
 	case 'customer.subscription.created':
 		$subscription = $event->data->object;
 		$data = [

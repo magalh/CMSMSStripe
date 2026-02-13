@@ -39,25 +39,57 @@ try {
 	];
 	
 	foreach($products_data as $product) {
-		if($product->default_price) {
-			$price = $stripe->prices->retrieve($product->default_price);
+		// Fetch all active prices for this product
+		$prices = $stripe->prices->all(['product' => $product->id, 'active' => true, 'limit' => 100]);
+		
+		$product->prices = [];
+		$product->has_multiple_prices = count($prices->data) > 1;
+		
+		foreach($prices->data as $price) {
 			$currency_lower = strtolower($price->currency);
 			$symbol = $currency_symbols[$currency_lower] ?? strtoupper($price->currency);
 			
 			$amount = $price->unit_amount / 100;
-			$product->price_amount = ($amount == floor($amount)) ? number_format($amount, 0) : number_format($amount, 2);
-			$product->price_formatted = $symbol . $product->price_amount;
-			$product->price_amount = number_format($price->unit_amount / 100, 0);
-			$product->currency_symbol = $symbol;
-			$product->recurring = $price->type === 'recurring';
-			$product->price_id = $product->default_price;
-			if($product->recurring && isset($price->recurring->interval)) {
-				$product->interval = $price->recurring->interval;
-			}
-			$product->checkout_url = $this->CreateLink($id, 'create-checkout-session', $returnid, '', ['price_id' => $product->price_id, 'returnto' => $current_url], '', true, false, '', true);
+			$price_amount = ($amount == floor($amount)) ? number_format($amount, 0) : number_format($amount, 2);
+			
+			// Split price into integer and decimal parts
+			$price_parts = explode('.', $price_amount);
+			$price_integer = $price_parts[0];
+			$price_decimal = isset($price_parts[1]) ? $price_parts[1] : null;
+			
+			$price_data = [
+				'id' => $price->id,
+				'nickname' => $price->nickname ?? null,
+				'metadata' => $price->metadata ?? null,
+				'amount' => $price_amount,
+				'amount_raw' => $amount,
+				'amount_integer' => $price_integer,
+				'amount_decimal' => $price_decimal,
+				'formatted' => $symbol . $price_amount,
+				'symbol' => $symbol,
+				'currency' => $price->currency,
+				'type' => $price->type,
+				'recurring' => $price->type === 'recurring',
+				'interval' => $price->type === 'recurring' ? $price->recurring->interval : null,
+				'interval_count' => $price->type === 'recurring' ? $price->recurring->interval_count : null,
+				'checkout_url' => $this->CreateLink($id, 'create-checkout-session', $returnid, '', ['price_id' => $price->id, 'returnto' => $current_url], '', true, false, '', true)
+			];
+			
+			$product->prices[] = (object)$price_data;
 		}
+		
+		// Sort prices: recurring first, then by amount ascending
+		usort($product->prices, function($a, $b) {
+			if($a->recurring != $b->recurring) {
+				return $b->recurring - $a->recurring; // recurring first
+			}
+			return $a->amount_raw <=> $b->amount_raw; // then by amount
+		});
+		
 		$product_list[] = $product;
 	}
+
+	//\xt_utils::send_ajax_and_exit( $product_list, true);
 	
 	$template = \CMSMSStripe\utils::find_layout_template($params, 'template', 'CMSMSStripe::product_list');
 	if(!$template) {
@@ -67,6 +99,7 @@ try {
 	$tpl = $smarty->CreateTemplate($this->GetTemplateResource($template), null, null, $smarty);
 	$tpl->assign('products', $product_list);
 	$tpl->assign('actionid', $id);
+	$tpl->assign('highlight', $params['highlight'] ?? null);
 	$tpl->display();
 	
 } catch(\Exception $e) {

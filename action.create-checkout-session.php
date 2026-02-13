@@ -52,11 +52,15 @@ if($uid) {
 		$session_params['customer'] = $stripe_customer_id;
 		$session_params['customer_update'] = ['name' => 'auto'];
 	}
+} else {
+	$session_params['customer_creation'] = 'always';
 }
 
 $price = $stripe->prices->retrieve($params['price_id']);
 if($price->type === 'recurring') {
 	$session_params['mode'] = 'subscription';
+} else {
+	$session_params['invoice_creation'] = ['enabled' => true];
 }
 
 $checkout_session = $stripe->checkout->sessions->create($session_params);
