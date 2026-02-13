@@ -6,6 +6,7 @@ try {
 	$stripe = new \Stripe\StripeClient($this->GetPreference('cmsms_stripe_secret'));
 	
 	$product_ids = isset($params['products']) ? explode(',', trim($params['products'])) : [];
+	$category_filter = isset($params['category']) ? trim($params['category']) : null;
 	
 	if(!empty($product_ids)) {
 		// Fetch specific products
@@ -39,6 +40,11 @@ try {
 	];
 	
 	foreach($products_data as $product) {
+		// Filter by category if specified
+		if($category_filter && (!isset($product->metadata->category) || $product->metadata->category !== $category_filter)) {
+			continue;
+		}
+		
 		// Fetch all active prices for this product
 		$prices = $stripe->prices->all(['product' => $product->id, 'active' => true, 'limit' => 100]);
 		
