@@ -105,6 +105,7 @@ try {
 		if($customer_data['id']) {
 			$mams->SetUserPropertyFull('stripe_customer_id', $customer_data['id'], $uid);
 		}
+		$mams->ForcePasswordChange($uid, true);
 		$mams->Login($customer_data['email'], $random_password);
 	} else {
 		if($customer_data['id']) {
