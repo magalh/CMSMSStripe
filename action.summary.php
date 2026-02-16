@@ -7,6 +7,7 @@ try {
 	
 	$product_ids = isset($params['products']) ? explode(',', trim($params['products'])) : [];
 	$category_filter = isset($params['category']) ? trim($params['category']) : null;
+	$mode = isset($params['mode']) && $params['mode'] === 'separated' ? 'separated' : 'merged';
 	
 	if(!empty($product_ids)) {
 		// Fetch specific products
@@ -48,51 +49,86 @@ try {
 		// Fetch all active prices for this product
 		$prices = $stripe->prices->all(['product' => $product->id, 'active' => true, 'limit' => 100]);
 		
-		$product->prices = [];
-		$product->has_multiple_prices = count($prices->data) > 1;
-		
-		foreach($prices->data as $price) {
-			$currency_lower = strtolower($price->currency);
-			$symbol = $currency_symbols[$currency_lower] ?? strtoupper($price->currency);
-			
-			$amount = $price->unit_amount / 100;
-			$price_amount = ($amount == floor($amount)) ? number_format($amount, 0) : number_format($amount, 2);
-			
-			// Split price into integer and decimal parts
-			$price_parts = explode('.', $price_amount);
-			$price_integer = $price_parts[0];
-			$price_decimal = isset($price_parts[1]) ? $price_parts[1] : null;
-			
-			$price_data = [
-				'id' => $price->id,
-				'nickname' => $price->nickname ?? null,
-				'metadata' => $price->metadata ?? null,
-				'amount' => $price_amount,
-				'amount_raw' => $amount,
-				'amount_integer' => $price_integer,
-				'amount_decimal' => $price_decimal,
-				'formatted' => $symbol . $price_amount,
-				'symbol' => $symbol,
-				'currency' => $price->currency,
-				'type' => $price->type,
-				'recurring' => $price->type === 'recurring',
-				'interval' => $price->type === 'recurring' ? $price->recurring->interval : null,
-				'interval_count' => $price->type === 'recurring' ? $price->recurring->interval_count : null,
-				'checkout_url' => $this->CreateLink($id, 'create-checkout-session', $returnid, '', ['price_id' => $price->id, 'returnto' => $current_url], '', true, false, '', true)
-			];
-			
-			$product->prices[] = (object)$price_data;
-		}
-		
-		// Sort prices: recurring first, then by amount ascending
-		usort($product->prices, function($a, $b) {
-			if($a->recurring != $b->recurring) {
-				return $b->recurring - $a->recurring; // recurring first
+		if($mode === 'separated') {
+			// Create separate product entry for each price
+			foreach($prices->data as $price) {
+				$currency_lower = strtolower($price->currency);
+				$symbol = $currency_symbols[$currency_lower] ?? strtoupper($price->currency);
+				
+				$amount = $price->unit_amount / 100;
+				$price_amount = ($amount == floor($amount)) ? number_format($amount, 0) : number_format($amount, 2);
+				
+				$price_parts = explode('.', $price_amount);
+				$price_integer = $price_parts[0];
+				$price_decimal = isset($price_parts[1]) ? $price_parts[1] : null;
+				
+				$separated_product = clone $product;
+				$separated_product->price_id = $price->id;
+				$separated_product->price_nickname = $price->nickname ?? null;
+				$separated_product->price_metadata = $price->metadata ?? null;
+				$separated_product->amount = $price_amount;
+				$separated_product->amount_raw = $amount;
+				$separated_product->amount_integer = $price_integer;
+				$separated_product->amount_decimal = $price_decimal;
+				$separated_product->formatted = $symbol . $price_amount;
+				$separated_product->symbol = $symbol;
+				$separated_product->currency = $price->currency;
+				$separated_product->price_type = $price->type;
+				$separated_product->recurring = $price->type === 'recurring';
+				$separated_product->interval = $price->type === 'recurring' ? $price->recurring->interval : null;
+				$separated_product->interval_count = $price->type === 'recurring' ? $price->recurring->interval_count : null;
+				$separated_product->checkout_url = $this->CreateLink($id, 'create-checkout-session', $returnid, '', ['price_id' => $price->id, 'returnto' => $current_url], '', true, false, '', true);
+				
+				$product_list[] = $separated_product;
 			}
-			return $a->amount_raw <=> $b->amount_raw; // then by amount
-		});
-		
-		$product_list[] = $product;
+		} else {
+			// Merged mode: keep prices array
+			$product->prices = [];
+			$product->has_multiple_prices = count($prices->data) > 1;
+			
+			foreach($prices->data as $price) {
+				$currency_lower = strtolower($price->currency);
+				$symbol = $currency_symbols[$currency_lower] ?? strtoupper($price->currency);
+				
+				$amount = $price->unit_amount / 100;
+				$price_amount = ($amount == floor($amount)) ? number_format($amount, 0) : number_format($amount, 2);
+				
+				$price_parts = explode('.', $price_amount);
+				$price_integer = $price_parts[0];
+				$price_decimal = isset($price_parts[1]) ? $price_parts[1] : null;
+				
+				$price_data = [
+					'id' => $price->id,
+					'nickname' => $price->nickname ?? null,
+					'metadata' => $price->metadata ?? null,
+					'amount' => $price_amount,
+					'amount_raw' => $amount,
+					'amount_integer' => $price_integer,
+					'amount_decimal' => $price_decimal,
+					'formatted' => $symbol . $price_amount,
+					'symbol' => $symbol,
+					'currency' => $price->currency,
+					'type' => $price->type,
+					'recurring' => $price->type === 'recurring',
+					'interval' => $price->type === 'recurring' ? $price->recurring->interval : null,
+					'interval_count' => $price->type === 'recurring' ? $price->recurring->interval_count : null,
+					'checkout_url' => $this->CreateLink($id, 'create-checkout-session', $returnid, '', ['price_id' => $price->id, 'returnto' => $current_url], '', true, false, '', true)
+				];
+				
+				$product->prices[] = (object)$price_data;
+			}
+			
+			// Sort prices: recurring first, then by amount ascending
+			usort($product->prices, function($a, $b) {
+				if($a->recurring != $b->recurring) {
+					return $b->recurring - $a->recurring;
+				}
+				return $a->amount_raw <=> $b->amount_raw;
+			});
+			
+			$product->checkout_url = $this->CreateLink($id, 'create-checkout-session', $returnid, '', ['price_id' => $product->default_price, 'returnto' => $current_url], '', true, false, '', true);
+			$product_list[] = $product;
+		}
 	}
 
 	//\xt_utils::send_ajax_and_exit( $product_list, true);

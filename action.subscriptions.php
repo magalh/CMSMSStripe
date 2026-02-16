@@ -13,6 +13,9 @@ try {
 		'limit' => 100,
 		'expand' => ['data.plan.product']
 	]);
+
+	//\xt_utils::send_ajax_and_exit( $subscriptions->data, true );
+
 	
 	$smarty->assign('has_subscription', true);
 	$smarty->assignGlobal('subscriptions', $subscriptions->data);

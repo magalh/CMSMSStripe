@@ -37,6 +37,9 @@
 									{/if}
 								</div>
 							</div>
+							<div class="card-footer text-center">
+								<p><strong>License Key:</strong> {ProductLicenses action="license" invoice="{$purchase->id}"}</p>
+							</div>
 						</div>
 					</div>
 				{/foreach}

@@ -10,6 +10,8 @@ try {
 	$session = $stripe->checkout->sessions->retrieve($session_id, [
 		'expand' => ['line_items', 'customer', 'subscription']
 	]);
+
+	//\xt_utils::send_ajax_and_exit( $session, true );
 	
 	// Use customer if exists, otherwise use customer_details
 	$customer = $session->customer;
@@ -143,7 +145,8 @@ try {
 		'product_name' => $product_name,
 		'amount' => $session->amount_total / 100,
 		'currency' => $session->currency,
-		'payment_status' => $session->payment_status
+		'payment_status' => $session->payment_status,
+		'invoice' => $session->invoice ?? null
 	];
 	
 	if($subscription) {
@@ -159,6 +162,7 @@ try {
 	//\xt_utils::send_ajax_and_exit( $data );
 	
 	\CMSMS\HookManager::do_hook('CMSMSStripe::CheckoutSuccess', $data);
+
 	
 } catch(\Exception $e) {
 	echo '<p class="error">Error: ' . $e->getMessage() . '</p>';

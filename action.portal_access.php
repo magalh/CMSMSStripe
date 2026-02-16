@@ -25,10 +25,10 @@ if(isset($params['cid']) && $params['print']) {
 	$this->validate_config();
 	$stripe = new \Stripe\StripeClient($this->GetPreference('cmsms_stripe_secret'));
 	$portal_session = $stripe->billingPortal->sessions->create([
-		'customer' => $params['sid'],
+		'customer' => $params['cid'],
 		'return_url' => $return_url,
 	]);
-	$smarty->assign(\trim($params['print']), $portal_session->url);
+	$smarty->assignGlobal(\trim($params['print']), $portal_session->url);
 	return;
 }
 

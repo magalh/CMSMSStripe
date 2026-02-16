@@ -27,6 +27,9 @@ try {
 	foreach($invoices->data as $invoice) {
 		if(!$invoice->subscription) {
 			foreach($invoice->lines->data as $line) {
+
+			//\xt_utils::send_ajax_and_exit( $line, true );
+
 				if(isset($line->price)) {
 					$product = $stripe->products->retrieve($line->price->product);
 					$all_purchases[] = (object)[
