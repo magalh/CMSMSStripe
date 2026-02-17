@@ -32,6 +32,7 @@ $session_params = [
 		'enabled' => true
 	],
 	'allow_promotion_codes' => true,
+	'payment_method_collection' => 'if_required',
 	'success_url' => CMS_ROOT_URL.'/index.php?mact=CMSMSStripe,cntnt01,success,0&cntnt01session_id={CHECKOUT_SESSION_ID}',
 	'cancel_url' => $cancel_url,
 ];
