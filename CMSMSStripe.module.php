@@ -223,7 +223,7 @@ class CMSMSStripe extends CMSModule
 				$mams->AssignUserToGroup($params['id'], $gid);
 			}
 			
-			$mams->SetUserProperty($params['id'], 'stripe_customer_id', $customer->id);
+			$mams->SetUserPropertyFull('stripe_customer_id', $customer->id, $params['id']);
 			audit('', 'CMSMSStripe', 'Linked MAMS user ' . $params['id'] . ' to Stripe customer ' . $customer->id);
 			
 		} catch(\Exception $e) {
