@@ -48,6 +48,8 @@ try {
 	$product_name = null;
 	$product_type = null;
 	$credits = null;
+	$product = null;
+	$first_item = null;
 	
 	if($session->line_items && $session->line_items->data) {
 		$first_item = $session->line_items->data[0];
@@ -56,10 +58,6 @@ try {
 			$product = $stripe->products->retrieve($product_id);
 			$product_name = $product->name;
 			$product_type = $product->type;
-			
-			if(isset($first_item->price->metadata->credits)) {
-				$credits = $first_item->price->metadata->credits;
-			}
 		}
 	}
 
@@ -115,25 +113,6 @@ try {
 		$mams->AssignUserToGroup($uid, $stripe_gid);
 		$smarty->assign('uinfo', $uinfo);
 	}
-	
-	
-	$smarty->assign('session_id', $session->id);
-	$smarty->assign('stripe_customer_id', $customer_data["id"]);
-	$smarty->assign('customer', $customer_data);
-	$smarty->assign('customer_email', $customer_data["email"]);
-	$smarty->assign('subscription', $subscription_data);
-	$smarty->assign('product_id', $product_id);
-	$smarty->assign('product_name', $product_name);
-	$smarty->assign('product_type', $product_type);
-	$smarty->assign('isloggedin', $isloggedin);
-	$smarty->assign('isuser', $isuser);
-	$smarty->assign('isnewuser', $isnewuser);
-	$smarty->assign('amount', number_format($session->amount_total / 100, 2));
-	$smarty->assign('currency', strtoupper($session->currency));
-	
-	$template = \CMSMSStripe\utils::find_layout_template($params, 'template', 'CMSMSStripe::payment_success');
-	$tpl = $smarty->CreateTemplate($this->GetTemplateResource($template), null, null, $smarty);
-	$tpl->display();
 
 	$data = [
 		'session_id' => $session->id,
@@ -155,10 +134,45 @@ try {
 		$data['product_type'] = "subscription";
 	}
 	
-	if($credits) {
-		$data['credits_total'] = $credits;
+	$data['metadata'] = [];
+	if($product && $product->metadata) {
+		foreach($product->metadata->toArray() as $key => $value) {
+			$data['metadata'][$key] = $value;
+		}
+	}
+	if($first_item && $first_item->price) {
+		if($first_item->price->metadata) {
+			foreach($first_item->price->metadata->toArray() as $key => $value) {
+				$data['metadata'][$key] = $value;
+			}
+		}
+		if(!empty($first_item->price->nickname)) {
+			$data['metadata']['plan'] = $first_item->price->nickname;
+		}
+	}
+
+	if(!empty($data['metadata']) && isset($data['metadata']['credits'])) {
+		$data['credits_total'] = $data['metadata']['credits'];
 		$data['product_type'] = "credits";
 	}
+	
+	$smarty->assign('session_id', $session->id);
+	$smarty->assign('stripe_customer_id', $customer_data["id"]);
+	$smarty->assign('customer', $customer_data);
+	$smarty->assign('customer_email', $customer_data["email"]);
+	$smarty->assign('subscription', $subscription_data);
+	$smarty->assign('product_id', $product_id);
+	$smarty->assign('product_name', $product_name);
+	$smarty->assign('product_type', $product_type);
+	$smarty->assign('isloggedin', $isloggedin);
+	$smarty->assign('isuser', $isuser);
+	$smarty->assign('isnewuser', $isnewuser);
+	$smarty->assign('amount', number_format($session->amount_total / 100, 2));
+	$smarty->assign('currency', strtoupper($session->currency));
+	
+	$template = \CMSMSStripe\utils::find_layout_template($params, 'template', 'CMSMSStripe::payment_success');
+	$tpl = $smarty->CreateTemplate($this->GetTemplateResource($template), null, null, $smarty);
+	$tpl->display();
 
 	//\xt_utils::send_ajax_and_exit( $data );
 	
