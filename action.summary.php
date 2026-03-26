@@ -7,6 +7,7 @@ try {
 	
 	$product_ids = isset($params['products']) ? explode(',', trim($params['products'])) : [];
 	$category_filter = isset($params['category']) ? trim($params['category']) : null;
+	$platform_filter = isset($params['platform']) ? trim($params['platform']) : null;
 	$mode = isset($params['mode']) && $params['mode'] === 'separated' ? 'separated' : 'merged';
 	
 	if(!empty($product_ids)) {
@@ -48,6 +49,13 @@ try {
 		
 		// Fetch all active prices for this product
 		$prices = $stripe->prices->all(['product' => $product->id, 'active' => true, 'limit' => 100]);
+		
+		// Filter prices by platform metadata if specified
+		if($platform_filter) {
+			$prices->data = array_values(array_filter($prices->data, function($price) use ($platform_filter) {
+				return isset($price->metadata->platform) && $price->metadata->platform === $platform_filter;
+			}));
+		}
 		
 		if($mode === 'separated') {
 			// Create separate product entry for each price
